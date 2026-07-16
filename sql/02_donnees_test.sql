@@ -1,6 +1,6 @@
 USE uam_evote;
 
-SET @hash = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+SET @hash = '$2a$10$21envPocrGOw6qdckgthie72kTabXvFnfv26d4PGk3rIh3KbWKB0O';
 
 INSERT INTO users (matricule, nom, prenom, email, login, password, role, classe, departement, ufr) VALUES
                                                                                                        ('ADM001', 'Diop', 'Fatou', 'fatou.diop@uam.edu.sn', 'admin', @hash, 'ADMIN', NULL, NULL, 'STA'),
