@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="15" styleClass="login-container"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="uam.evote.controller.ElectionFormController">
+
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25" />
+    </padding>
+
+    <Label fx:id="titreLabel" text="Créer une élection" styleClass="titre" />
+
+    <GridPane hgap="10" vgap="12">
+        <Label text="Titre :" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <TextField fx:id="titreField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+        <Label text="Type d'élection :" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <ComboBox fx:id="typeCombo" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+        <Label text="Cible :" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <ComboBox fx:id="cibleTypeCombo" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+        <Label text="Valeur cible :" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <TextField fx:id="cibleValeurField" promptText="ex: L3 Informatique, Informatique, STA..."
+                   GridPane.rowIndex="3" GridPane.columnIndex="1" />
+
+        <Label text="Date début :" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+        <DatePicker fx:id="dateDebutPicker" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+
+        <Label text="Date fin :" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+        <DatePicker fx:id="dateFinPicker" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+    </GridPane>
+
+    <Label fx:id="messageErreur" styleClass="message-erreur" visible="false" managed="false" />
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Annuler" onAction="#handleAnnuler" />
+        <Button text="Enregistrer" onAction="#handleEnregistrer" styleClass="bouton-principal" />
+    </HBox>
+
+</VBox>
