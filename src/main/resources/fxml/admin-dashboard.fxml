@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="15" styleClass="login-container"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="uam.evote.controller.AdminDashboardController">
+
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40" />
+    </padding>
+
+    <Label text="Tableau de bord Administrateur" styleClass="titre" />
+    <Label fx:id="bienvenueLabel" styleClass="sous-titre" />
+
+</VBox>
