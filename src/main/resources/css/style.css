@@ -1,0 +1,32 @@
+.login-container {
+    -fx-background-color: #f4f6f8;
+}
+
+.titre {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a3c6e;
+}
+
+.sous-titre {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555555;
+}
+
+.bouton-principal {
+    -fx-background-color: #1a3c6e;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 24 8 24;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+
+.bouton-principal:hover {
+    -fx-background-color: #2a5490;
+}
+
+.message-erreur {
+    -fx-text-fill: #cc3333;
+    -fx-font-size: 12px;
+}

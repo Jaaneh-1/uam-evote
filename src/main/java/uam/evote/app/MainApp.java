@@ -1,18 +1,27 @@
 package uam.evote.app;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.util.Objects;
 
 public class MainApp extends Application {
 
     @Override
-    public void start(Stage primaryStage) {
-        Label label = new Label("UAM e-Vote — ça fonctionne !");
-        StackPane root = new StackPane(label);
-        Scene scene = new Scene(root, 500, 300);
+    public void start(Stage primaryStage) throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/login.fxml")
+        );
+        Parent root = loader.load();
+
+        Scene scene = new Scene(root, 500, 400);
+        scene.getStylesheets().add(
+                Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm()
+        );
 
         primaryStage.setTitle("UAM e-Vote");
         primaryStage.setScene(scene);
