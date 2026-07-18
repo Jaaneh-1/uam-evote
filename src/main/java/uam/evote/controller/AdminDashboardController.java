@@ -1,5 +1,5 @@
 package uam.evote.controller;
-
+import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -35,6 +35,8 @@ public class AdminDashboardController {
     private TableColumn<UserTableModel, String> colRole;
     @FXML
     private TableColumn<UserTableModel, String> colClasse;
+    @FXML
+    private TableColumn<UserTableModel, String> colUfr;
 
     private final UserService userService = new UserService();
     private User utilisateurConnecte;
@@ -48,6 +50,7 @@ public class AdminDashboardController {
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colRole.setCellValueFactory(new PropertyValueFactory<>("role"));
         colClasse.setCellValueFactory(new PropertyValueFactory<>("classeOuDepartement"));
+        colUfr.setCellValueFactory(new PropertyValueFactory<>("ufr"));
 
         chargerUtilisateurs();
     }
@@ -83,7 +86,7 @@ public class AdminDashboardController {
 
     @FXML
     private void handleAjouter() {
-        afficherMessage("La fenêtre d'ajout sera codée à l'étape suivante.");
+        ouvrirFormulaire(null);
     }
 
     @FXML
@@ -93,7 +96,33 @@ public class AdminDashboardController {
             afficherMessage("Veuillez sélectionner un utilisateur à modifier.");
             return;
         }
-        afficherMessage("La fenêtre de modification sera codée à l'étape suivante.");
+        ouvrirFormulaire(selection.getUser());
+    }
+
+    private void ouvrirFormulaire(User userAModifier) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/fxml/user-form.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            UserFormController controller = loader.getController();
+            controller.setOnSuccess(this::chargerUtilisateurs);
+
+            if (userAModifier != null) {
+                controller.setUserEnEdition(userAModifier);
+            }
+
+            Stage popup = new Stage();
+            popup.setTitle(userAModifier == null ? "Ajouter un utilisateur" : "Modifier l'utilisateur");
+            popup.setScene(new javafx.scene.Scene(root));
+            popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            popup.showAndWait();
+
+        } catch (java.io.IOException e) {
+            afficherMessage("Erreur lors de l'ouverture du formulaire.");
+            e.printStackTrace();
+        }
     }
 
     @FXML

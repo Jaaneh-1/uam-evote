@@ -17,6 +17,7 @@ public class UserTableModel {
     private final SimpleStringProperty email;
     private final SimpleStringProperty role;
     private final SimpleStringProperty classeOuDepartement;
+    private final SimpleStringProperty ufr;
 
     public UserTableModel(User user) {
         this.user = user;
@@ -25,6 +26,7 @@ public class UserTableModel {
         this.prenom = new SimpleStringProperty(user.getPrenom());
         this.email = new SimpleStringProperty(user.getEmail());
         this.role = new SimpleStringProperty(user.getRole().name());
+        this.ufr = new SimpleStringProperty(user.getUfr() != null ? user.getUfr() : "-");
 
         String classeOuDept = user.getRole() == User.Role.ETUDIANT
                 ? user.getClasse()
@@ -60,5 +62,9 @@ public class UserTableModel {
 
     public String getClasseOuDepartement() {
         return classeOuDepartement.get();
+    }
+
+    public String getUfr() {
+        return ufr.get();
     }
 }

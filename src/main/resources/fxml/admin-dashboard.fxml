@@ -38,6 +38,7 @@
                 <TableColumn fx:id="colEmail" text="Email" prefWidth="180" />
                 <TableColumn fx:id="colRole" text="Rôle" prefWidth="100" />
                 <TableColumn fx:id="colClasse" text="Classe/Département" prefWidth="140" />
+                <TableColumn fx:id="colUfr" text="UFR" prefWidth="80" />
             </columns>
         </TableView>
     </center>
