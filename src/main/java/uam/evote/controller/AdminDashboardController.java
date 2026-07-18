@@ -11,6 +11,7 @@ import uam.evote.view.UserTableModel;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import uam.evote.view.ElectionTableModel;
 
 public class AdminDashboardController {
 
@@ -41,6 +42,32 @@ public class AdminDashboardController {
     private final UserService userService = new UserService();
     private User utilisateurConnecte;
 
+
+
+    @FXML
+    private TableView<ElectionTableModel> tableElections;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colTitre;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colType;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colCible;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colDateDebut;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colDateFin;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colStatutElection;
+
+    private final uam.evote.service.ElectionService electionService = new uam.evote.service.ElectionService();
+
+
+
+
+
+
+
+
     @FXML
     public void initialize() {
         // Relie chaque colonne à la méthode getter correspondante de UserTableModel
@@ -53,6 +80,15 @@ public class AdminDashboardController {
         colUfr.setCellValueFactory(new PropertyValueFactory<>("ufr"));
 
         chargerUtilisateurs();
+
+        colTitre.setCellValueFactory(new PropertyValueFactory<>("titre"));
+        colType.setCellValueFactory(new PropertyValueFactory<>("type"));
+        colCible.setCellValueFactory(new PropertyValueFactory<>("cible"));
+        colDateDebut.setCellValueFactory(new PropertyValueFactory<>("dateDebut"));
+        colDateFin.setCellValueFactory(new PropertyValueFactory<>("dateFin"));
+        colStatutElection.setCellValueFactory(new PropertyValueFactory<>("statut"));
+
+        chargerElections();
     }
 
     public void initData(User user) {
@@ -146,5 +182,104 @@ public class AdminDashboardController {
     private void afficherMessage(String texte) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, texte);
         alert.showAndWait();
+    }
+
+
+    private void chargerElections() {
+        List<uam.evote.model.Election> elections = electionService.listerToutes();
+        ObservableList<uam.evote.view.ElectionTableModel> data = FXCollections.observableArrayList(
+                elections.stream().map(uam.evote.view.ElectionTableModel::new).collect(Collectors.toList())
+        );
+        tableElections.setItems(data);
+    }
+
+    @FXML
+    private void handleAjouterElection() {
+        ouvrirFormulaireElection(null);
+    }
+
+    @FXML
+    private void handleModifierElection() {
+        uam.evote.view.ElectionTableModel selection = tableElections.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner une élection à modifier.");
+            return;
+        }
+        ouvrirFormulaireElection(selection.getElection());
+    }
+
+    private void ouvrirFormulaireElection(uam.evote.model.Election electionAModifier) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/fxml/election-form.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            uam.evote.controller.ElectionFormController controller = loader.getController();
+            controller.setOnSuccess(this::chargerElections);
+            controller.setAdminId(utilisateurConnecte.getId());
+
+            if (electionAModifier != null) {
+                controller.setElectionEnEdition(electionAModifier);
+            }
+
+            Stage popup = new Stage();
+            popup.setTitle(electionAModifier == null ? "Créer une élection" : "Modifier l'élection");
+            popup.setScene(new javafx.scene.Scene(root));
+            popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            popup.showAndWait();
+
+        } catch (java.io.IOException e) {
+            afficherMessage("Erreur lors de l'ouverture du formulaire.");
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleOuvrirScrutin() {
+        uam.evote.view.ElectionTableModel selection = tableElections.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner une élection.");
+            return;
+        }
+        try {
+            electionService.ouvrirScrutin(selection.getElection().getId());
+            chargerElections();
+        } catch (IllegalStateException e) {
+            afficherMessage(e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleFermerScrutin() {
+        uam.evote.view.ElectionTableModel selection = tableElections.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner une élection.");
+            return;
+        }
+        try {
+            electionService.fermerScrutin(selection.getElection().getId());
+            chargerElections();
+        } catch (IllegalStateException e) {
+            afficherMessage(e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleSupprimerElection() {
+        uam.evote.view.ElectionTableModel selection = tableElections.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner une élection à supprimer.");
+            return;
+        }
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,
+                "Supprimer l'élection \"" + selection.getTitre() + "\" ?");
+        confirmation.showAndWait().ifPresent(reponse -> {
+            if (reponse == ButtonType.OK) {
+                electionService.supprimerElection(selection.getElection().getId());
+                chargerElections();
+            }
+        });
     }
 }
