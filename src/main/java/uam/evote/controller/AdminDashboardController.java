@@ -409,4 +409,33 @@ public class AdminDashboardController {
             }
         });
     }
+
+    @FXML
+    private void handleVoirResultats() {
+        ElectionTableModel selection = tableElections.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner une élection.");
+            return;
+        }
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/fxml/resultats.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            uam.evote.controller.ResultatsController controller = loader.getController();
+            controller.initData(selection.getElection());
+
+            Stage popup = new Stage();
+            popup.setTitle("Résultats - " + selection.getTitre());
+            popup.setScene(new javafx.scene.Scene(root, 820, 500));
+            popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            popup.showAndWait();
+
+        } catch (java.io.IOException e) {
+            afficherMessage("Erreur lors de l'ouverture des résultats.");
+            e.printStackTrace();
+        }
+    }
 }

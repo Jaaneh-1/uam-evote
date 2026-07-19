@@ -93,6 +93,7 @@
                             <Button text="Modifier" onAction="#handleModifierElection" />
                             <Button text="Ouvrir le scrutin" onAction="#handleOuvrirScrutin" />
                             <Button text="Fermer le scrutin" onAction="#handleFermerScrutin" />
+                            <Button text="Voir résultats" onAction="#handleVoirResultats" />
                             <Button text="Supprimer" onAction="#handleSupprimerElection" />
                         </HBox>
                     </bottom>
