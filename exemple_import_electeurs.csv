@@ -1,0 +1,4 @@
+matricule,nom,prenom,email,login,role,classe,departement,ufr
+ETU200,Sy,Fatima,fatima.sy@uam.edu.sn,fatima.sy,ETUDIANT,L3 Informatique,,STA
+ETU201,Cisse,Omar,omar.cisse@uam.edu.sn,omar.cisse,ETUDIANT,L3 Informatique,,STA
+ENS100,Toure,Awa,awa.toure@uam.edu.sn,awa.toure,ENSEIGNANT,,Informatique,STA
