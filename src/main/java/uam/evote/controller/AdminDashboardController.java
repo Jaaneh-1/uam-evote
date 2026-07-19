@@ -438,4 +438,44 @@ public class AdminDashboardController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void handleImporterCSV() {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Importer des électeurs depuis un CSV");
+        fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("Fichiers CSV", "*.csv")
+        );
+
+        java.io.File fichier = fileChooser.showOpenDialog(tableUtilisateurs.getScene().getWindow());
+        if (fichier == null) {
+            return;
+        }
+
+        try {
+            UserService.ImportRapport rapport = userService.importerDepuisCSV(fichier.getAbsolutePath());
+
+            StringBuilder message = new StringBuilder();
+            message.append(rapport.getNbSucces()).append(" utilisateur(s) importé(s) avec succès.\n");
+
+            if (rapport.getNbEchecs() > 0) {
+                message.append(rapport.getNbEchecs()).append(" échec(s) :\n");
+                for (String echec : rapport.getEchecs()) {
+                    message.append("- ").append(echec).append("\n");
+                }
+            }
+
+            Alert alert = new Alert(
+                    rapport.getNbEchecs() == 0 ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING,
+                    message.toString()
+            );
+            alert.setHeaderText("Résultat de l'import");
+            alert.showAndWait();
+
+            chargerUtilisateurs();
+
+        } catch (java.io.IOException e) {
+            afficherMessage("Erreur lors de la lecture du fichier CSV : " + e.getMessage());
+        }
+    }
 }

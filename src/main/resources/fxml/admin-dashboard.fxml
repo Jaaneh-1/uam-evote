@@ -57,6 +57,7 @@
                             <Button text="Ajouter" onAction="#handleAjouter" styleClass="bouton-principal" />
                             <Button text="Modifier" onAction="#handleModifier" />
                             <Button text="Supprimer" onAction="#handleSupprimer" />
+                            <Button text="Importer CSV" onAction="#handleImporterCSV" />
                         </HBox>
                     </bottom>
                 </BorderPane>
