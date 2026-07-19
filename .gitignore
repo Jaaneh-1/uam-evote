@@ -41,3 +41,7 @@ build/
 
 # Config sensible (mots de passe)
 src/main/resources/db.properties
+
+
+
+data/photos/
