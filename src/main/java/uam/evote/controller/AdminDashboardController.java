@@ -100,6 +100,10 @@ public class AdminDashboardController {
 
 
 
+    private final uam.evote.service.CarteService carteService = new uam.evote.service.CarteService();
+
+
+
 
 
 
@@ -534,6 +538,34 @@ public class AdminDashboardController {
         } catch (java.io.IOException e) {
             afficherMessage("Erreur lors de l'ouverture des résultats.");
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleGenererCarte() {
+        UserTableModel selection = tableUtilisateurs.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner un utilisateur.");
+            return;
+        }
+
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Enregistrer la carte d'électeur");
+        fileChooser.setInitialFileName("carte_" + selection.getUser().getMatricule() + ".pdf");
+        fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf")
+        );
+
+        java.io.File fichier = fileChooser.showSaveDialog(tableUtilisateurs.getScene().getWindow());
+        if (fichier == null) {
+            return;
+        }
+
+        try {
+            carteService.genererCarte(selection.getUser(), fichier.getAbsolutePath());
+            afficherMessage("Carte générée : " + fichier.getName());
+        } catch (java.io.IOException e) {
+            afficherMessage("Erreur lors de la génération de la carte : " + e.getMessage());
         }
     }
 }

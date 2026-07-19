@@ -58,6 +58,7 @@
                             <Button text="Modifier" onAction="#handleModifier" />
                             <Button text="Supprimer" onAction="#handleSupprimer" />
                             <Button text="Importer CSV" onAction="#handleImporterCSV" />
+                            <Button text="Générer carte électeur" onAction="#handleGenererCarte" />
                         </HBox>
                     </bottom>
                 </BorderPane>
