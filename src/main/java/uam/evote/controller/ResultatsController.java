@@ -11,6 +11,11 @@ import uam.evote.service.UserService;
 import uam.evote.service.VoteService;
 
 import java.util.List;
+import javafx.stage.FileChooser;
+import uam.evote.service.ExportService;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public class ResultatsController {
 
@@ -32,22 +37,29 @@ public class ResultatsController {
     private final VoteService voteService = new VoteService();
     private final UserService userService = new UserService();
 
+    private final ExportService exportService = new ExportService();
+
+    private Election electionCourante;
+    private List<VoteService.ResultatCandidat> resultatsCourants;
+    private int nbElecteursCourant;
+
     public void initData(Election election) {
+        this.electionCourante = election;
         titreLabel.setText("Résultats - " + election.getTitre());
 
-        List<VoteService.ResultatCandidat> resultats = voteService.calculerResultats(election.getId());
+        this.resultatsCourants = voteService.calculerResultats(election.getId());
+        this.nbElecteursCourant = voteService.compterElecteursEligibles(election, userService.listerTous());
 
-        int nbElecteurs = voteService.compterElecteursEligibles(election, userService.listerTous());
-        int nbVotes = resultats.stream().mapToInt(VoteService.ResultatCandidat::getNbVotes).sum();
-        double taux = nbElecteurs == 0 ? 0 : (nbVotes * 100.0 / nbElecteurs);
+        int nbVotes = resultatsCourants.stream().mapToInt(VoteService.ResultatCandidat::getNbVotes).sum();
+        double taux = nbElecteursCourant == 0 ? 0 : (nbVotes * 100.0 / nbElecteursCourant);
 
-        electeursLabel.setText("Électeurs éligibles : " + nbElecteurs);
+        electeursLabel.setText("Électeurs éligibles : " + nbElecteursCourant);
         votesLabel.setText("Votes exprimés : " + nbVotes);
         participationLabel.setText(String.format("Participation : %.1f %%", taux));
 
-        afficherVainqueur(resultats, nbVotes);
-        remplirPieChart(resultats);
-        remplirBarChart(resultats);
+        afficherVainqueur(resultatsCourants, nbVotes);
+        remplirPieChart(resultatsCourants);
+        remplirBarChart(resultatsCourants);
     }
 
     private void afficherVainqueur(List<VoteService.ResultatCandidat> resultats, int nbVotes) {
@@ -97,5 +109,57 @@ public class ResultatsController {
         barChart.getData().add(serie);
         barChart.setTitle("Votes par candidat");
         barChart.setLegendVisible(false);
+    }
+
+    @FXML
+    private void handleExportPDF() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Exporter les résultats en PDF");
+        fileChooser.setInitialFileName("resultats_" + electionCourante.getId() + ".pdf");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf")
+        );
+
+        File fichier = fileChooser.showSaveDialog(titreLabel.getScene().getWindow());
+        if (fichier == null) {
+            return;
+        }
+
+        try {
+            exportService.exporterPDF(electionCourante, resultatsCourants, nbElecteursCourant,
+                    fichier.getAbsolutePath());
+            afficherInfo("Export PDF réussi : " + fichier.getName());
+        } catch (IOException e) {
+            afficherInfo("Erreur lors de l'export PDF : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleExportCSV() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Exporter les résultats en CSV");
+        fileChooser.setInitialFileName("resultats_" + electionCourante.getId() + ".csv");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers CSV", "*.csv")
+        );
+
+        File fichier = fileChooser.showSaveDialog(titreLabel.getScene().getWindow());
+        if (fichier == null) {
+            return;
+        }
+
+        try {
+            exportService.exporterCSV(electionCourante, resultatsCourants, fichier.getAbsolutePath());
+            afficherInfo("Export CSV réussi : " + fichier.getName());
+        } catch (IOException e) {
+            afficherInfo("Erreur lors de l'export CSV : " + e.getMessage());
+        }
+    }
+
+    private void afficherInfo(String texte) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.INFORMATION, texte
+        );
+        alert.showAndWait();
     }
 }
