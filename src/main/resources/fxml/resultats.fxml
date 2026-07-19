@@ -8,6 +8,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+
 
 <VBox spacing="15" styleClass="login-container"
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -39,4 +41,10 @@
         </BarChart>
     </HBox>
 
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Exporter en PDF" onAction="#handleExportPDF" />
+        <Button text="Exporter en CSV" onAction="#handleExportCSV" />
+    </HBox>
+
 </VBox>
+
