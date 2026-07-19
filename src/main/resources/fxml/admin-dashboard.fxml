@@ -99,6 +99,45 @@
                 </BorderPane>
             </Tab>
 
+
+            <Tab text="Candidats">
+                <BorderPane>
+                    <top>
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets top="15" right="15" bottom="10" left="15" />
+                            </padding>
+                            <Label text="Gestion des candidats" styleClass="sous-titre" />
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Élection :" />
+                                <ComboBox fx:id="electionCandidatsCombo" prefWidth="300" onAction="#handleChangerElectionCandidats" />
+                            </HBox>
+                        </VBox>
+                    </top>
+                    <center>
+                        <TableView fx:id="tableCandidats">
+                            <columns>
+                                <TableColumn fx:id="colNomCandidat" text="Nom" prefWidth="120" />
+                                <TableColumn fx:id="colPrenomCandidat" text="Prénom" prefWidth="120" />
+                                <TableColumn fx:id="colProfession" text="Profession" prefWidth="160" />
+                                <TableColumn fx:id="colProgramme" text="Programme" prefWidth="250" />
+                                <TableColumn fx:id="colPhotoCandidat" text="Photo" prefWidth="70" />
+                            </columns>
+                        </TableView>
+                    </center>
+                    <bottom>
+                        <HBox spacing="10" alignment="CENTER">
+                            <padding>
+                                <Insets top="10" right="15" bottom="15" left="15" />
+                            </padding>
+                            <Button text="Ajouter un candidat" onAction="#handleAjouterCandidat" styleClass="bouton-principal" />
+                            <Button text="Modifier" onAction="#handleModifierCandidat" />
+                            <Button text="Supprimer" onAction="#handleSupprimerCandidat" />
+                        </HBox>
+                    </bottom>
+                </BorderPane>
+            </Tab>
+
         </TabPane>
     </center>
 

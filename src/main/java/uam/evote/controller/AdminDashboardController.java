@@ -13,6 +13,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import uam.evote.view.ElectionTableModel;
 
+import uam.evote.model.Election;
+import uam.evote.model.Candidat;
+import uam.evote.service.CandidatService;
+import uam.evote.view.CandidatTableModel;
+
 public class AdminDashboardController {
 
     @FXML
@@ -63,6 +68,25 @@ public class AdminDashboardController {
 
 
 
+    @FXML
+    private ComboBox<Election> electionCandidatsCombo;
+    @FXML
+    private TableView<CandidatTableModel> tableCandidats;
+    @FXML
+    private TableColumn<CandidatTableModel, String> colNomCandidat;
+    @FXML
+    private TableColumn<CandidatTableModel, String> colPrenomCandidat;
+    @FXML
+    private TableColumn<CandidatTableModel, String> colProfession;
+    @FXML
+    private TableColumn<CandidatTableModel, String> colProgramme;
+    @FXML
+    private TableColumn<CandidatTableModel, String> colPhotoCandidat;
+
+    private final CandidatService candidatService = new CandidatService();
+
+
+
 
 
 
@@ -89,6 +113,25 @@ public class AdminDashboardController {
         colStatutElection.setCellValueFactory(new PropertyValueFactory<>("statut"));
 
         chargerElections();
+
+
+        colNomCandidat.setCellValueFactory(new PropertyValueFactory<>("nom"));
+        colPrenomCandidat.setCellValueFactory(new PropertyValueFactory<>("prenom"));
+        colProfession.setCellValueFactory(new PropertyValueFactory<>("profession"));
+        colProgramme.setCellValueFactory(new PropertyValueFactory<>("programme"));
+        colPhotoCandidat.setCellValueFactory(new PropertyValueFactory<>("photo"));
+
+        electionCandidatsCombo.setConverter(new javafx.util.StringConverter<Election>() {
+            @Override
+            public String toString(Election election) {
+                return election == null ? "" : election.getTitre();
+            }
+            @Override
+            public Election fromString(String string) {
+                return null;
+            }
+        });
+        electionCandidatsCombo.setItems(FXCollections.observableArrayList(electionService.listerToutes()));
     }
 
     public void initData(User user) {
@@ -279,6 +322,90 @@ public class AdminDashboardController {
             if (reponse == ButtonType.OK) {
                 electionService.supprimerElection(selection.getElection().getId());
                 chargerElections();
+            }
+        });
+    }
+
+
+    @FXML
+    private void handleChangerElectionCandidats() {
+        chargerCandidats();
+    }
+
+    private void chargerCandidats() {
+        Election election = electionCandidatsCombo.getValue();
+        if (election == null) {
+            tableCandidats.setItems(FXCollections.observableArrayList());
+            return;
+        }
+        List<Candidat> candidats = candidatService.listerParElection(election.getId());
+        ObservableList<CandidatTableModel> data = FXCollections.observableArrayList(
+                candidats.stream().map(CandidatTableModel::new).collect(Collectors.toList())
+        );
+        tableCandidats.setItems(data);
+    }
+
+    @FXML
+    private void handleAjouterCandidat() {
+        Election election = electionCandidatsCombo.getValue();
+        if (election == null) {
+            afficherMessage("Veuillez d'abord sélectionner une élection.");
+            return;
+        }
+        ouvrirFormulaireCandidat(null, election.getId());
+    }
+
+    @FXML
+    private void handleModifierCandidat() {
+        CandidatTableModel selection = tableCandidats.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner un candidat à modifier.");
+            return;
+        }
+        ouvrirFormulaireCandidat(selection.getCandidat(), selection.getCandidat().getElectionId());
+    }
+
+    private void ouvrirFormulaireCandidat(Candidat candidatAModifier, int electionId) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/fxml/candidat-form.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            CandidatFormController controller = loader.getController();
+            controller.setOnSuccess(this::chargerCandidats);
+            controller.setElectionId(electionId);
+
+            if (candidatAModifier != null) {
+                controller.setCandidatEnEdition(candidatAModifier);
+            }
+
+            Stage popup = new Stage();
+            popup.setTitle(candidatAModifier == null ? "Ajouter un candidat" : "Modifier le candidat");
+            popup.setScene(new javafx.scene.Scene(root));
+            popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            popup.showAndWait();
+
+        } catch (java.io.IOException e) {
+            afficherMessage("Erreur lors de l'ouverture du formulaire.");
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleSupprimerCandidat() {
+        CandidatTableModel selection = tableCandidats.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner un candidat à supprimer.");
+            return;
+        }
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,
+                "Supprimer le candidat " + selection.getNom() + " " + selection.getPrenom() + " ?");
+        confirmation.showAndWait().ifPresent(reponse -> {
+            if (reponse == ButtonType.OK) {
+                candidatService.supprimerCandidat(selection.getCandidat().getId());
+                chargerCandidats();
             }
         });
     }
