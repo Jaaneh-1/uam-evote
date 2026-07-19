@@ -87,6 +87,19 @@ public class AdminDashboardController {
 
 
 
+    @FXML
+    private TableView<ElectionTableModel> tableHistorique;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colTitreHisto;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colTypeHisto;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colCibleHisto;
+    @FXML
+    private TableColumn<ElectionTableModel, String> colDateFinHisto;
+
+
+
 
 
 
@@ -132,6 +145,13 @@ public class AdminDashboardController {
             }
         });
         electionCandidatsCombo.setItems(FXCollections.observableArrayList(electionService.listerToutes()));
+
+        colTitreHisto.setCellValueFactory(new PropertyValueFactory<>("titre"));
+        colTypeHisto.setCellValueFactory(new PropertyValueFactory<>("type"));
+        colCibleHisto.setCellValueFactory(new PropertyValueFactory<>("cible"));
+        colDateFinHisto.setCellValueFactory(new PropertyValueFactory<>("dateFin"));
+
+        chargerHistorique();
     }
 
     public void initData(User user) {
@@ -303,6 +323,7 @@ public class AdminDashboardController {
         try {
             electionService.fermerScrutin(selection.getElection().getId());
             chargerElections();
+            chargerHistorique();
         } catch (IllegalStateException e) {
             afficherMessage(e.getMessage());
         }
@@ -476,6 +497,43 @@ public class AdminDashboardController {
 
         } catch (java.io.IOException e) {
             afficherMessage("Erreur lors de la lecture du fichier CSV : " + e.getMessage());
+        }
+    }
+
+    private void chargerHistorique() {
+        List<Election> historique = electionService.listerHistorique();
+        ObservableList<ElectionTableModel> data = FXCollections.observableArrayList(
+                historique.stream().map(ElectionTableModel::new).collect(Collectors.toList())
+        );
+        tableHistorique.setItems(data);
+    }
+
+    @FXML
+    private void handleVoirResultatsHistorique() {
+        ElectionTableModel selection = tableHistorique.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner une élection.");
+            return;
+        }
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/fxml/resultats.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            uam.evote.controller.ResultatsController controller = loader.getController();
+            controller.initData(selection.getElection());
+
+            Stage popup = new Stage();
+            popup.setTitle("Résultats - " + selection.getTitre());
+            popup.setScene(new javafx.scene.Scene(root, 820, 500));
+            popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            popup.showAndWait();
+
+        } catch (java.io.IOException e) {
+            afficherMessage("Erreur lors de l'ouverture des résultats.");
+            e.printStackTrace();
         }
     }
 }
