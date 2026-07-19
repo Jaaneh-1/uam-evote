@@ -9,6 +9,9 @@ import uam.evote.model.Vote;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 public class VoteService {
 
     private final ElectionDAO electionDAO;
@@ -68,6 +71,58 @@ public class VoteService {
             // un double vote qui aurait échappé aux vérifications ci-dessus
             // (ex: deux clics rapides, ou double connexion simultanée)
             throw new IllegalStateException("Vous avez déjà voté à cette élection.");
+        }
+    }
+
+    /**
+     * Calcule le nombre d'électeurs éligibles à une élection donnée,
+     * en filtrant tous les utilisateurs avec Election.estEligible().
+     */
+    public int compterElecteursEligibles(Election election, List<User> tousLesUtilisateurs) {
+        return (int) tousLesUtilisateurs.stream()
+                .filter(u -> u.getRole() != User.Role.ADMIN) // un admin ne vote jamais
+                .filter(election::estEligible)
+                .count();
+    }
+
+    /**
+     * Résultats du dépouillement, avec le nom des candidats déjà résolu
+     * (pratique pour l'affichage), triés du plus de voix au moins de voix.
+     * Reste 100% anonyme : aucune donnée d'électeur n'entre dans ce calcul.
+     */
+    public List<ResultatCandidat> calculerResultats(int electionId) {
+        Map<Integer, Integer> votesParCandidat = voteDAO.compterVotesParCandidat(electionId);
+        List<Candidat> candidats = candidatDAO.trouverParElection(electionId);
+
+        List<ResultatCandidat> resultats = new ArrayList<>();
+        for (Candidat candidat : candidats) {
+            int nbVotes = votesParCandidat.getOrDefault(candidat.getId(), 0);
+            resultats.add(new ResultatCandidat(candidat, nbVotes));
+        }
+
+        resultats.sort((a, b) -> Integer.compare(b.getNbVotes(), a.getNbVotes()));
+        return resultats;
+    }
+
+    /**
+     * Petite classe interne : associe un candidat à son nombre de votes,
+     * pour simplifier l'affichage dans l'interface (tableau de bord, graphiques).
+     */
+    public static class ResultatCandidat {
+        private final Candidat candidat;
+        private final int nbVotes;
+
+        public ResultatCandidat(Candidat candidat, int nbVotes) {
+            this.candidat = candidat;
+            this.nbVotes = nbVotes;
+        }
+
+        public Candidat getCandidat() {
+            return candidat;
+        }
+
+        public int getNbVotes() {
+            return nbVotes;
         }
     }
 }
