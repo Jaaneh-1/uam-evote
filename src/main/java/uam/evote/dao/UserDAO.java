@@ -27,4 +27,8 @@ public interface UserDAO {
 
     // Rechercher des utilisateurs par mot-clé (nom, prénom ou matricule)
     List<User> rechercher(String motCle);
+
+    void definirQrToken(int userId, String token);
+
+    Optional<User> trouverParQrToken(String token);
 }

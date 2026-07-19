@@ -17,6 +17,7 @@ import uam.evote.model.Election;
 import uam.evote.model.Candidat;
 import uam.evote.service.CandidatService;
 import uam.evote.view.CandidatTableModel;
+import uam.evote.service.AuthService;
 
 public class AdminDashboardController {
 
@@ -101,6 +102,7 @@ public class AdminDashboardController {
 
 
     private final uam.evote.service.CarteService carteService = new uam.evote.service.CarteService();
+    private final uam.evote.service.QrCodeService qrCodeService = new uam.evote.service.QrCodeService();
 
 
 
@@ -566,6 +568,36 @@ public class AdminDashboardController {
             afficherMessage("Carte générée : " + fichier.getName());
         } catch (java.io.IOException e) {
             afficherMessage("Erreur lors de la génération de la carte : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleGenererQR() {
+        UserTableModel selection = tableUtilisateurs.getSelectionModel().getSelectedItem();
+        if (selection == null) {
+            afficherMessage("Veuillez sélectionner un utilisateur.");
+            return;
+        }
+
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Enregistrer le QR Code");
+        fileChooser.setInitialFileName("qr_" + selection.getUser().getMatricule() + ".png");
+        fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("Images PNG", "*.png")
+        );
+
+        java.io.File fichier = fileChooser.showSaveDialog(tableUtilisateurs.getScene().getWindow());
+        if (fichier == null) {
+            return;
+        }
+
+        try {
+            AuthService authService = new AuthService();
+            String token = authService.genererQrToken(selection.getUser());
+            qrCodeService.genererImagePNG(token, fichier.getAbsolutePath(), 300);
+            afficherMessage("QR Code généré : " + fichier.getName());
+        } catch (java.io.IOException e) {
+            afficherMessage("Erreur lors de la génération du QR Code : " + e.getMessage());
         }
     }
 }

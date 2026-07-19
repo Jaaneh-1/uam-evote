@@ -85,4 +85,28 @@ public class LoginController {
         messageErreur.setVisible(!texte.isEmpty());
         messageErreur.setManaged(!texte.isEmpty());
     }
+
+    @FXML
+    private void handleScanQR() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/fxml/qr-scanner.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            QrScannerController controller = loader.getController();
+            controller.setOnQrDetecte(user -> {
+                System.out.println("Connexion par QR réussie : " + user);
+                rediriger(user);
+            });
+
+            Stage popup = new Stage();
+            popup.setTitle("Scanner QR Code");
+            popup.setScene(new Scene(root));
+            popup.showAndWait();
+
+        } catch (IOException e) {
+            afficherErreur("Erreur lors de l'ouverture du scanner.");
+        }
+    }
 }

@@ -26,4 +26,6 @@
 
     <Button text="Se connecter" onAction="#handleConnexion" styleClass="bouton-principal" />
 
+    <Button text="Se connecter par QR Code" onAction="#handleScanQR" />
+
 </VBox>

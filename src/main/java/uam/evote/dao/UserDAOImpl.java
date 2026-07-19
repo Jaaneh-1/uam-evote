@@ -185,6 +185,37 @@ public class UserDAOImpl implements UserDAO {
         user.setClasse(rs.getString("classe"));
         user.setDepartement(rs.getString("departement"));
         user.setUfr(rs.getString("ufr"));
+        user.setQrToken(rs.getString("qr_token"));
         return user;
+    }
+
+    @Override
+    public void definirQrToken(int userId, String token) {
+        String sql = "UPDATE users SET qr_token = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, token);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la définition du jeton QR", e);
+        }
+    }
+
+    @Override
+    public Optional<User> trouverParQrToken(String token) {
+        String sql = "SELECT * FROM users WHERE qr_token = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, token);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToUser(rs));
+                }
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de la recherche par jeton QR", e);
+        }
     }
 }
