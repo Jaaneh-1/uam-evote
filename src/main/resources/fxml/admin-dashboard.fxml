@@ -140,6 +140,37 @@
                 </BorderPane>
             </Tab>
 
+            <Tab text="Historique">
+                <BorderPane>
+                    <top>
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets top="15" right="15" bottom="10" left="15" />
+                            </padding>
+                            <Label text="Historique des élections terminées" styleClass="sous-titre" />
+                        </VBox>
+                    </top>
+                    <center>
+                        <TableView fx:id="tableHistorique">
+                            <columns>
+                                <TableColumn fx:id="colTitreHisto" text="Titre" prefWidth="220" />
+                                <TableColumn fx:id="colTypeHisto" text="Type" prefWidth="150" />
+                                <TableColumn fx:id="colCibleHisto" text="Cible" prefWidth="180" />
+                                <TableColumn fx:id="colDateFinHisto" text="Clôturée le" prefWidth="140" />
+                            </columns>
+                        </TableView>
+                    </center>
+                    <bottom>
+                        <HBox spacing="10" alignment="CENTER">
+                            <padding>
+                                <Insets top="10" right="15" bottom="15" left="15" />
+                            </padding>
+                            <Button text="Voir résultats" onAction="#handleVoirResultatsHistorique" styleClass="bouton-principal" />
+                        </HBox>
+                    </bottom>
+                </BorderPane>
+            </Tab>
+
         </TabPane>
     </center>
 

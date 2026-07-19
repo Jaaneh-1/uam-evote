@@ -66,4 +66,14 @@ public class ElectionService {
         }
         electionDAO.changerStatut(electionId, Election.Statut.FERMEE);
     }
+
+    /**
+     * Historique : toutes les élections dont le scrutin est terminé (statut FERMEE),
+     * triées de la plus récente à la plus ancienne.
+     */
+    public List<Election> listerHistorique() {
+        return electionDAO.trouverParStatut(Election.Statut.FERMEE).stream()
+                .sorted((a, b) -> b.getDateFin().compareTo(a.getDateFin()))
+                .toList();
+    }
 }
