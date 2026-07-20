@@ -59,6 +59,7 @@
                             <Button text="Supprimer" onAction="#handleSupprimer" />
                             <Button text="Importer CSV" onAction="#handleImporterCSV" />
                             <Button text="Générer carte électeur" onAction="#handleGenererCarte" />
+                            <Button text="Générer QR Code" onAction="#handleGenererQR" />
                         </HBox>
                     </bottom>
                 </BorderPane>

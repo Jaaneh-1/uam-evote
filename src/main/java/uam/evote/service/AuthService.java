@@ -44,4 +44,20 @@ public class AuthService {
     public String hacherMotDePasse(String motDePasseClair) {
         return BCrypt.hashpw(motDePasseClair, BCrypt.gensalt());
     }
+
+    /**
+     * Génère (ou régénère) un jeton QR unique pour un utilisateur, et le stocke en base.
+     */
+    public String genererQrToken(User user) {
+        String token = java.util.UUID.randomUUID().toString();
+        userDAO.definirQrToken(user.getId(), token);
+        return token;
+    }
+
+    /**
+     * Connexion via un jeton scanné (QR code), sans mot de passe.
+     */
+    public Optional<User> connexionParToken(String token) {
+        return userDAO.trouverParQrToken(token);
+    }
 }
