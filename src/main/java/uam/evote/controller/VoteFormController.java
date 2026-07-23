@@ -9,6 +9,7 @@ import uam.evote.model.Candidat;
 import uam.evote.model.Election;
 import uam.evote.model.User;
 import uam.evote.service.VoteService;
+import uam.evote.service.ConnectivityService;
 
 import java.util.List;
 
@@ -101,6 +102,13 @@ public class VoteFormController {
     }
 
     private void enregistrerVote(int candidatId) {
+        ConnectivityService connectivityService = new ConnectivityService();
+
+        if (!connectivityService.estConnecte()) {
+            enregistrerVoteHorsLigne(candidatId);
+            return;
+        }
+
         try {
             voteService.voter(electeur, election.getId(), candidatId);
 
@@ -116,6 +124,28 @@ public class VoteFormController {
         } catch (IllegalStateException e) {
             afficherErreur(e.getMessage());
         }
+    }
+
+    private void enregistrerVoteHorsLigne(int candidatId) {
+        uam.evote.utils.OfflineVoteQueue queue = new uam.evote.utils.OfflineVoteQueue();
+
+        if (queue.dejaEnAttente(election.getId(), electeur.getId())) {
+            afficherErreur("Vous avez déjà un vote en attente de synchronisation pour cette élection.");
+            return;
+        }
+
+        queue.ajouter(election.getId(), candidatId, electeur.getId());
+
+        Alert info = new Alert(Alert.AlertType.INFORMATION,
+                "Connexion au serveur indisponible. Votre vote a été enregistré localement "
+                        + "et sera transmis automatiquement dès le retour de la connexion.");
+        info.setHeaderText(null);
+        info.showAndWait();
+
+        if (onSuccess != null) {
+            onSuccess.run();
+        }
+        fermerFenetre();
     }
 
     @FXML

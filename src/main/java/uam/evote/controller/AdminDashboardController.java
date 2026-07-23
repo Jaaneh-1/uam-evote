@@ -600,4 +600,29 @@ public class AdminDashboardController {
             afficherMessage("Erreur lors de la génération du QR Code : " + e.getMessage());
         }
     }
+
+    @FXML
+    private void handleSynchroniser() {
+        uam.evote.service.VoteSyncService syncService = new uam.evote.service.VoteSyncService();
+        uam.evote.service.VoteSyncService.SyncRapport rapport = syncService.synchroniser();
+
+        StringBuilder message = new StringBuilder();
+        message.append(rapport.getSucces().size()).append(" vote(s) synchronisé(s) avec succès.\n");
+
+        if (!rapport.getEchecs().isEmpty()) {
+            message.append(rapport.getEchecs().size()).append(" rejet(s) définitif(s) :\n");
+            rapport.getEchecs().forEach(e -> message.append("- ").append(e).append("\n"));
+        }
+
+        if (rapport.getNbEncoreEnAttente() > 0) {
+            message.append(rapport.getNbEncoreEnAttente())
+                    .append(" vote(s) toujours en attente (connexion probablement encore indisponible).");
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, message.toString());
+        alert.setHeaderText("Synchronisation des votes hors ligne");
+        alert.showAndWait();
+
+        chargerElections();
+    }
 }
