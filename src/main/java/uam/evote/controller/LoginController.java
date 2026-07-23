@@ -37,14 +37,19 @@ public class LoginController {
             return;
         }
 
-        Optional<User> resultat = authService.connexion(login, motDePasse);
+        try {
+            Optional<User> resultat = authService.connexion(login, motDePasse);
 
-        if (resultat.isPresent()) {
-            User user = resultat.get();
-            System.out.println("Connexion réussie : " + user);
-            rediriger(user);
-        } else {
-            afficherErreur("Login ou mot de passe incorrect.");
+            if (resultat.isPresent()) {
+                User user = resultat.get();
+                System.out.println("Connexion réussie : " + user);
+                rediriger(user);
+            } else {
+                afficherErreur("Login ou mot de passe incorrect.");
+            }
+
+        } catch (RuntimeException e) {
+            afficherErreur("Connexion au serveur impossible. Vérifiez votre réseau et réessayez.");
         }
     }
 

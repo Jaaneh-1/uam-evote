@@ -98,6 +98,7 @@
                             <Button text="Fermer le scrutin" onAction="#handleFermerScrutin" />
                             <Button text="Voir résultats" onAction="#handleVoirResultats" />
                             <Button text="Supprimer" onAction="#handleSupprimerElection" />
+                            <Button text="Synchroniser votes hors ligne" onAction="#handleSynchroniser" />
                         </HBox>
                     </bottom>
                 </BorderPane>

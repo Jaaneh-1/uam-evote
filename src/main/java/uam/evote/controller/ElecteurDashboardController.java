@@ -107,6 +107,8 @@ public class ElecteurDashboardController {
         } catch (java.io.IOException e) {
             afficherMessage("Erreur lors de l'ouverture du formulaire de vote.");
             e.printStackTrace();
+        } catch (RuntimeException e) {
+            afficherMessage("Connexion au serveur impossible. Impossible de charger la liste des candidats pour le moment. Réessayez une fois la connexion rétablie.");
         }
     }
 
