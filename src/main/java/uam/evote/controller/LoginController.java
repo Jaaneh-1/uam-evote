@@ -75,9 +75,11 @@ public class LoginController {
             }
 
             Stage stage = (Stage) loginField.getScene().getWindow();
-            Scene scene = new Scene(root, 600, 400);
+            Scene scene = new Scene(root, 1100, 700);
             scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
             stage.setScene(scene);
+            stage.setMinWidth(900);
+            stage.setMinHeight(600);
 
         } catch (IOException e) {
             afficherErreur("Erreur lors du chargement de l'écran suivant.");

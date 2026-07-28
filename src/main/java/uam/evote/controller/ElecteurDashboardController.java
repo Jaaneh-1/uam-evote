@@ -1,68 +1,94 @@
 package uam.evote.controller;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import uam.evote.model.Election;
 import uam.evote.model.User;
 import uam.evote.service.VoteService;
-import uam.evote.view.ElectionEligibleTableModel;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ElecteurDashboardController {
 
     @FXML
-    private Label bienvenueLabel;
-
+    private Label avatarLabel;
     @FXML
-    private TableView<ElectionEligibleTableModel> tableElections;
+    private Label nomLabel;
     @FXML
-    private TableColumn<ElectionEligibleTableModel, String> colTitre;
+    private Label roleLabel;
     @FXML
-    private TableColumn<ElectionEligibleTableModel, String> colType;
-    @FXML
-    private TableColumn<ElectionEligibleTableModel, String> colDateFin;
-    @FXML
-    private TableColumn<ElectionEligibleTableModel, String> colStatutVote;
+    private FlowPane cardsContainer;
 
     private final VoteService voteService = new VoteService();
     private User utilisateurConnecte;
 
-    @FXML
-    public void initialize() {
-        colTitre.setCellValueFactory(new PropertyValueFactory<>("titre"));
-        colType.setCellValueFactory(new PropertyValueFactory<>("type"));
-        colDateFin.setCellValueFactory(new PropertyValueFactory<>("dateFin"));
-        colStatutVote.setCellValueFactory(new PropertyValueFactory<>("statutVote"));
-    }
-
     public void initData(User user) {
         this.utilisateurConnecte = user;
-        bienvenueLabel.setText("Bienvenue, " + user.getNomComplet() + " (" + user.getRole() + ")");
+
+        String initiales = "" + user.getPrenom().charAt(0) + user.getNom().charAt(0);
+        avatarLabel.setText(initiales.toUpperCase());
+        nomLabel.setText(user.getNomComplet());
+        roleLabel.setText(user.getRole().name());
+
         chargerElections();
     }
 
     private void chargerElections() {
+        cardsContainer.getChildren().clear();
+
         List<Election> elections = voteService.listerElectionsEligibles(utilisateurConnecte);
 
-        ObservableList<ElectionEligibleTableModel> data = FXCollections.observableArrayList(
-                elections.stream()
-                        .map(election -> new ElectionEligibleTableModel(
-                                election,
-                                voteService.aDejaVote(election.getId(), utilisateurConnecte.getId())
-                        ))
-                        .collect(Collectors.toList())
-        );
-        tableElections.setItems(data);
+        if (elections.isEmpty()) {
+            Label vide = new Label("Aucune élection ouverte pour le moment.");
+            vide.setStyle("-fx-text-fill: #A9776A; -fx-font-size: 13px;");
+            cardsContainer.getChildren().add(vide);
+            return;
+        }
+
+        for (Election election : elections) {
+            boolean dejaVote = voteService.aDejaVote(election.getId(), utilisateurConnecte.getId());
+            cardsContainer.getChildren().add(creerCarteElection(election, dejaVote));
+        }
+    }
+
+    private VBox creerCarteElection(Election election, boolean dejaVote) {
+        Label titre = new Label(election.getTitre());
+        titre.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #7A3E2E;");
+        titre.setWrapText(true);
+
+        Label type = new Label(election.getTypeElection().name());
+        type.setStyle("-fx-font-size: 11px; -fx-text-fill: #A9776A;");
+
+        Label dateFin = new Label("Clôture : "
+                + election.getDateFin().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+        dateFin.setStyle("-fx-font-size: 11px; -fx-text-fill: #A9776A;");
+
+        Label badge = new Label(dejaVote ? "Déjà voté ✓" : "Vous pouvez voter");
+        badge.getStyleClass().add(dejaVote ? "badge-succes" : "badge-attente");
+
+        Button boutonVoter = new Button(dejaVote ? "Déjà voté" : "Voter");
+        boutonVoter.setDisable(dejaVote);
+        boutonVoter.setMaxWidth(Double.MAX_VALUE);
+        boutonVoter.getStyleClass().add(dejaVote ? "button" : "bouton-principal");
+        boutonVoter.setOnAction(e -> ouvrirFormulaireVote(election));
+
+        Region spacer = new Region();
+
+        VBox carte = new VBox(8, titre, type, dateFin, badge, spacer, boutonVoter);
+        carte.getStyleClass().add("election-card");
+        carte.setPrefWidth(260);
+
+        return carte;
     }
 
     @FXML
@@ -70,29 +96,10 @@ public class ElecteurDashboardController {
         chargerElections();
     }
 
-    @FXML
-    private void handleVoter() {
-        ElectionEligibleTableModel selection = tableElections.getSelectionModel().getSelectedItem();
-
-        if (selection == null) {
-            afficherMessage("Veuillez sélectionner une élection.");
-            return;
-        }
-
-        if (voteService.aDejaVote(selection.getElection().getId(), utilisateurConnecte.getId())) {
-            afficherMessage("Vous avez déjà voté à cette élection.");
-            return;
-        }
-
-        ouvrirFormulaireVote(selection.getElection());
-    }
-
     private void ouvrirFormulaireVote(Election election) {
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
-                    getClass().getResource("/fxml/vote-form.fxml")
-            );
-            javafx.scene.Parent root = loader.load();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/vote-form.fxml"));
+            Parent root = loader.load();
 
             VoteFormController controller = loader.getController();
             controller.setOnSuccess(this::chargerElections);
@@ -100,20 +107,45 @@ public class ElecteurDashboardController {
 
             Stage popup = new Stage();
             popup.setTitle("Voter - " + election.getTitre());
-            popup.setScene(new javafx.scene.Scene(root, 500, 500));
+            popup.setScene(new Scene(root, 500, 500));
             popup.initModality(Modality.APPLICATION_MODAL);
             popup.showAndWait();
 
         } catch (java.io.IOException e) {
-            afficherMessage("Erreur lors de l'ouverture du formulaire de vote.");
-            e.printStackTrace();
+            afficherErreurChargement();
         } catch (RuntimeException e) {
-            afficherMessage("Connexion au serveur impossible. Impossible de charger la liste des candidats pour le moment. Réessayez une fois la connexion rétablie.");
+            afficherErreurConnexion();
         }
     }
 
-    private void afficherMessage(String texte) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, texte);
+    @FXML
+    private void handleDeconnexion() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) cardsContainer.getScene().getWindow();
+            Scene scene = new Scene(root, 480, 560);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            stage.setScene(scene);
+            stage.setMinWidth(0);
+            stage.setMinHeight(0);
+
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void afficherErreurChargement() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.ERROR, "Erreur lors de l'ouverture du formulaire de vote.");
+        alert.showAndWait();
+    }
+
+    private void afficherErreurConnexion() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.WARNING,
+                "Connexion au serveur impossible. Réessayez une fois la connexion rétablie.");
         alert.showAndWait();
     }
 }
