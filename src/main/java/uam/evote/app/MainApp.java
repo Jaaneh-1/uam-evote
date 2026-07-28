@@ -18,7 +18,7 @@ public class MainApp extends Application {
         );
         Parent root = loader.load();
 
-        Scene scene = new Scene(root, 500, 400);
+        Scene scene = new Scene(root, 480, 560);
         scene.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("/css/style.css")).toExternalForm()
         );

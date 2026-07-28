@@ -1,32 +1,277 @@
-.login-container {
-    -fx-background-color: #f4f6f8;
+/* ===== Palette "Peach" ===== */
+
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
+.login-container {
+    -fx-background-color: #FBEDE6; /* Light Peach en fond */
+}
+
+/* ===== Typographie ===== */
+
 .titre {
-    -fx-font-size: 28px;
+    -fx-font-size: 26px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1a3c6e;
+    -fx-text-fill: #7A3E2E; /* brun chaud, lisible sur fond clair */
 }
 
 .sous-titre {
-    -fx-font-size: 14px;
-    -fx-text-fill: #555555;
-}
-
-.bouton-principal {
-    -fx-background-color: #1a3c6e;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 8 24 8 24;
-    -fx-background-radius: 4;
-    -fx-cursor: hand;
-}
-
-.bouton-principal:hover {
-    -fx-background-color: #2a5490;
+    -fx-font-size: 13px;
+    -fx-text-fill: #A9776A;
 }
 
 .message-erreur {
-    -fx-text-fill: #cc3333;
+    -fx-text-fill: #C1442E;
     -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* ===== Champs de saisie ===== */
+
+.text-field, .password-field, .text-area, .combo-box, .date-picker {
+    -fx-background-color: white;
+    -fx-background-radius: 6;
+    -fx-border-color: #E8C4B4;
+    -fx-border-radius: 6;
+    -fx-padding: 6 10 6 10;
+}
+
+.text-field:focused, .password-field:focused, .combo-box:focused {
+    -fx-border-color: #E07A5F; /* Peach Orange */
+}
+
+/* ===== Boutons ===== */
+
+.button {
+    -fx-background-color: #F3D9CC; /* Pastel Peach */
+    -fx-text-fill: #7A3E2E;
+    -fx-font-size: 13px;
+    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+}
+
+.button:hover {
+    -fx-background-color: #EABFA9;
+}
+
+.bouton-principal {
+    -fx-background-color: #E07A5F; /* Peach Orange, couleur d'accent */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.bouton-principal:hover {
+    -fx-background-color: #C96549;
+}
+
+/* ===== TableView ===== */
+
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #F0DCD1;
+    -fx-border-radius: 8;
+    -fx-padding: 2;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #FBEDE6;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #F0DCD1;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #7A3E2E;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #FBEDE6 transparent;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #FDF6F2;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #F3D9CC;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: #7A3E2E;
+}
+
+.table-cell {
+    -fx-text-fill: #5C4033;
+    -fx-font-size: 12.5px;
+    -fx-padding: 8 10 8 10;
+}
+
+/* ===== TabPane ===== */
+
+.tab-pane .tab-header-area {
+    -fx-padding: 10 20 0 20;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: #FBEDE6;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 8 20 8 20;
+}
+
+.tab:selected {
+    -fx-background-color: white;
+    -fx-border-color: #F0DCD1;
+    -fx-border-width: 1 1 0 1;
+    -fx-border-radius: 8 8 0 0;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #A9776A;
+    -fx-font-size: 13px;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #C1442E;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: white;
+}
+
+/* ===== Alertes ===== */
+
+.alert {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* ===== ScrollPane ===== */
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ===== Sidebar (espace électeur) ===== */
+
+.sidebar {
+    -fx-background-color: #7A3E2E;
+    -fx-pref-width: 220;
+    -fx-min-width: 220;
+}
+
+.sidebar-titre {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.avatar-circle {
+    -fx-background-color: #E07A5F;
+    -fx-background-radius: 50%;
+    -fx-min-width: 56;
+    -fx-min-height: 56;
+    -fx-max-width: 56;
+    -fx-max-height: 56;
+    -fx-alignment: center;
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.sidebar-nom {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.sidebar-role {
+    -fx-text-fill: #E8C4B4;
+    -fx-font-size: 11px;
+}
+
+.nav-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #F3D9CC;
+    -fx-font-size: 13px;
+    -fx-alignment: center-left;
+    -fx-padding: 10 16 10 16;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-pref-width: 190;
+}
+
+.nav-item:hover {
+    -fx-background-color: #8C4E3D;
+}
+
+.nav-item-selected {
+    -fx-background-color: #E07A5F;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.nav-item-deconnexion {
+    -fx-text-fill: #F3D9CC;
+}
+
+/* ===== Cartes d'élection ===== */
+
+.election-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #F0DCD1;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(122,62,46,0.10), 12, 0, 0, 3);
+    -fx-padding: 18;
+    -fx-pref-width: 260;
+}
+
+.election-card-titre {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7A3E2E;
+}
+
+.election-card-type {
+    -fx-font-size: 11px;
+    -fx-text-fill: #A9776A;
+}
+
+.badge-succes {
+    -fx-background-color: #D8ECD9;
+    -fx-text-fill: #2F7A3C;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 20;
+}
+
+.badge-attente {
+    -fx-background-color: #FBE3D4;
+    -fx-text-fill: #C1442E;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 20;
 }

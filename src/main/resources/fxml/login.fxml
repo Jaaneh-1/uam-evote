@@ -5,27 +5,32 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="15" styleClass="login-container"
-      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="uam.evote.controller.LoginController">
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="uam.evote.controller.LoginController" styleClass="login-container">
 
-    <padding>
-        <Insets top="40" right="40" bottom="40" left="40" />
-    </padding>
+    <VBox alignment="CENTER" spacing="14" maxWidth="320"
+          style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);">
 
-    <Label text="UAM e-Vote" styleClass="titre" />
-    <Label text="Connexion" styleClass="sous-titre" />
+        <padding>
+            <Insets top="40" right="40" bottom="40" left="40" />
+        </padding>
 
-    <TextField fx:id="loginField" promptText="Login" maxWidth="250" />
+        <Label text="UAM e-Vote" styleClass="titre" />
+        <Label text="Connectez-vous pour continuer" styleClass="sous-titre" />
 
-    <PasswordField fx:id="passwordField" promptText="Mot de passe" maxWidth="250" />
+        <TextField fx:id="loginField" promptText="Login" maxWidth="250" />
 
-    <Label fx:id="messageErreur" styleClass="message-erreur" visible="false" managed="false" />
+        <PasswordField fx:id="passwordField" promptText="Mot de passe" maxWidth="250" />
 
-    <Button text="Se connecter" onAction="#handleConnexion" styleClass="bouton-principal" />
+        <Label fx:id="messageErreur" styleClass="message-erreur" visible="false" managed="false" wrapText="true" maxWidth="250" />
 
-    <Button text="Se connecter par QR Code" onAction="#handleScanQR" />
+        <Button text="Se connecter" onAction="#handleConnexion" styleClass="bouton-principal" maxWidth="250" />
 
-</VBox>
+        <Button text="Se connecter par QR Code" onAction="#handleScanQR" maxWidth="250" />
+
+    </VBox>
+
+</StackPane>
