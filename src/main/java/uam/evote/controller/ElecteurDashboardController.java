@@ -2,30 +2,57 @@ package uam.evote.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import uam.evote.model.Election;
 import uam.evote.model.User;
 import uam.evote.service.VoteService;
 
+import java.io.File;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public class ElecteurDashboardController {
 
     @FXML
     private Label avatarLabel;
     @FXML
+    private ImageView avatarImage;
+    @FXML
     private Label nomLabel;
     @FXML
     private Label roleLabel;
+    @FXML
+    private Label titreAccueilLabel;
+
+    @FXML
+    private VBox carteVedette;
+    @FXML
+    private Label vedetteTitreLabel;
+    @FXML
+    private Label vedetteSousLabel;
+    @FXML
+    private Button vedetteBouton;
+
+    @FXML
+    private Label statOuvertesLabel;
+    @FXML
+    private Label statVotesLabel;
+    @FXML
+    private Label statEnAttenteLabel;
+
     @FXML
     private FlowPane cardsContainer;
 
@@ -35,12 +62,27 @@ public class ElecteurDashboardController {
     public void initData(User user) {
         this.utilisateurConnecte = user;
 
-        String initiales = "" + user.getPrenom().charAt(0) + user.getNom().charAt(0);
-        avatarLabel.setText(initiales.toUpperCase());
+        titreAccueilLabel.setText("Bienvenue, " + user.getPrenom());
         nomLabel.setText(user.getNomComplet());
         roleLabel.setText(user.getRole().name());
 
+        configurerAvatar(user);
         chargerElections();
+    }
+
+    private void configurerAvatar(User user) {
+        if (user.getPhoto() != null && !user.getPhoto().isBlank() && new File(user.getPhoto()).exists()) {
+            Image image = new Image(new File(user.getPhoto()).toURI().toString());
+            avatarImage.setImage(image);
+
+            Circle clip = new Circle(28, 28, 28);
+            avatarImage.setClip(clip);
+            avatarLabel.setVisible(false);
+        } else {
+            String initiales = "" + user.getPrenom().charAt(0) + user.getNom().charAt(0);
+            avatarLabel.setText(initiales.toUpperCase());
+            avatarImage.setVisible(false);
+        }
     }
 
     private void chargerElections() {
@@ -48,17 +90,50 @@ public class ElecteurDashboardController {
 
         List<Election> elections = voteService.listerElectionsEligibles(utilisateurConnecte);
 
+        int nbVotes = 0;
+        Election prochaineAVoter = null;
+
+        for (Election election : elections) {
+            boolean dejaVote = voteService.aDejaVote(election.getId(), utilisateurConnecte.getId());
+            if (dejaVote) {
+                nbVotes++;
+            } else if (prochaineAVoter == null || election.getDateFin().isBefore(prochaineAVoter.getDateFin())) {
+                prochaineAVoter = election;
+            }
+            cardsContainer.getChildren().add(creerCarteElection(election, dejaVote));
+        }
+
+        // Statistiques
+        statOuvertesLabel.setText(String.valueOf(elections.size()));
+        statVotesLabel.setText(String.valueOf(nbVotes));
+        statEnAttenteLabel.setText(String.valueOf(elections.size() - nbVotes));
+
+        // Carte vedette
+        configurerCarteVedette(prochaineAVoter);
+
         if (elections.isEmpty()) {
             Label vide = new Label("Aucune élection ouverte pour le moment.");
             vide.setStyle("-fx-text-fill: #A9776A; -fx-font-size: 13px;");
             cardsContainer.getChildren().add(vide);
+        }
+    }
+
+    private void configurerCarteVedette(Election election) {
+        if (election == null) {
+            carteVedette.setVisible(false);
+            carteVedette.setManaged(false);
             return;
         }
 
-        for (Election election : elections) {
-            boolean dejaVote = voteService.aDejaVote(election.getId(), utilisateurConnecte.getId());
-            cardsContainer.getChildren().add(creerCarteElection(election, dejaVote));
-        }
+        carteVedette.setVisible(true);
+        carteVedette.setManaged(true);
+
+        vedetteTitreLabel.setText(election.getTitre());
+        vedetteSousLabel.setText("Clôture le "
+                + election.getDateFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm")));
+
+        Election finalElection = election;
+        vedetteBouton.setOnAction(e -> ouvrirFormulaireVote(finalElection));
     }
 
     private VBox creerCarteElection(Election election, boolean dejaVote) {
@@ -70,7 +145,7 @@ public class ElecteurDashboardController {
         type.setStyle("-fx-font-size: 11px; -fx-text-fill: #A9776A;");
 
         Label dateFin = new Label("Clôture : "
-                + election.getDateFin().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+                + election.getDateFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         dateFin.setStyle("-fx-font-size: 11px; -fx-text-fill: #A9776A;");
 
         Label badge = new Label(dejaVote ? "Déjà voté ✓" : "Vous pouvez voter");
@@ -107,7 +182,9 @@ public class ElecteurDashboardController {
 
             Stage popup = new Stage();
             popup.setTitle("Voter - " + election.getTitre());
-            popup.setScene(new Scene(root, 500, 500));
+            Scene scene = new Scene(root, 500, 500);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            popup.setScene(scene);
             popup.initModality(Modality.APPLICATION_MODAL);
             popup.showAndWait();
 

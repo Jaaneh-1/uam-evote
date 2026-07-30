@@ -3,31 +3,41 @@ package uam.evote.controller;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import uam.evote.model.Candidat;
 import uam.evote.model.Election;
 import uam.evote.model.User;
-import uam.evote.service.VoteService;
 import uam.evote.service.ConnectivityService;
+import uam.evote.service.VoteService;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.layout.FlowPane;
 
 public class VoteFormController {
 
     @FXML
     private Label titreElectionLabel;
     @FXML
-    private VBox candidatsContainer;
+    private FlowPane candidatsContainer;
     @FXML
     private Label messageErreur;
 
     private final VoteService voteService = new VoteService();
-    private final ToggleGroup groupeCandidats = new ToggleGroup();
 
     private Election election;
     private User electeur;
     private Runnable onSuccess;
+
+    private final List<VBox> cartesCandidats = new ArrayList<>();
+    private Integer candidatSelectionneId = null;
 
     public void setOnSuccess(Runnable callback) {
         this.onSuccess = callback;
@@ -41,62 +51,89 @@ public class VoteFormController {
         chargerCandidats();
     }
 
+
+
     private void chargerCandidats() {
         List<Candidat> candidats = voteService.listerCandidats(election.getId());
 
         for (Candidat candidat : candidats) {
-            candidatsContainer.getChildren().add(creerBlocCandidat(candidat));
+            VBox carte = creerCarteCandidat(candidat);
+            cartesCandidats.add(carte);
+            candidatsContainer.getChildren().add(carte);
         }
     }
 
-    /**
-     * Construit dynamiquement un bloc visuel pour un candidat : bouton radio + infos.
-     * On fait ça en Java (pas en FXML) car le nombre de candidats varie selon l'élection.
-     */
-    private VBox creerBlocCandidat(Candidat candidat) {
-        RadioButton radio = new RadioButton(candidat.getNomComplet());
-        radio.setToggleGroup(groupeCandidats);
-        radio.setUserData(candidat.getId()); // permet de retrouver l'id du candidat sélectionné
-        radio.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
+    private VBox creerCarteCandidat(Candidat candidat) {
+        ImageView photo = new ImageView();
+        photo.setFitWidth(70);
+        photo.setFitHeight(70);
+        photo.getStyleClass().add("candidat-photo");
+
+        if (candidat.getPhoto() != null && new File(candidat.getPhoto()).exists()) {
+            photo.setImage(new Image(new File(candidat.getPhoto()).toURI().toString()));
+        }
+        Circle clip = new Circle(35, 35, 35);
+        photo.setClip(clip);
+
+        Label nom = new Label(candidat.getNomComplet());
+        nom.getStyleClass().add("candidat-nom-grid");
+        nom.setMaxWidth(130);
 
         Label profession = new Label(
                 candidat.getProfession() != null ? candidat.getProfession() : ""
         );
-        profession.setStyle("-fx-font-size: 12px; -fx-text-fill: #555;");
+        profession.getStyleClass().add("candidat-profession-grid");
 
-        Label programme = new Label(
-                candidat.getProgramme() != null ? candidat.getProgramme() : ""
-        );
-        programme.setWrapText(true);
-        programme.setStyle("-fx-font-size: 12px;");
+        Button boutonSelection = new Button("Sélectionner");
+        boutonSelection.getStyleClass().add("bouton-selection");
 
-        VBox bloc = new VBox(4, radio, profession, programme);
-        bloc.setPadding(new Insets(10));
-        bloc.setStyle("-fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #ddd; -fx-border-radius: 6;");
+        VBox carte = new VBox(8, photo, nom, profession, boutonSelection);
+        carte.setAlignment(javafx.geometry.Pos.TOP_CENTER);
+        carte.getStyleClass().add("candidat-card-grid");
+        carte.setUserData(candidat.getId());
 
-        return bloc;
+        Runnable action = () -> selectionnerCarte(carte, boutonSelection, candidat.getId());
+        carte.setOnMouseClicked(e -> action.run());
+        boutonSelection.setOnAction(e -> action.run());
+
+        return carte;
     }
+
+    private final java.util.Map<VBox, Button> boutonsParCarte = new java.util.HashMap<>();
+
+    private void selectionnerCarte(VBox carteChoisie, Button boutonChoisi, int candidatId) {
+        for (VBox carte : cartesCandidats) {
+            carte.getStyleClass().remove("candidat-card-grid-selected");
+        }
+        for (Button b : boutonsParCarte.values()) {
+            b.getStyleClass().remove("bouton-selection-actif");
+            b.setText("Sélectionner");
+        }
+
+        carteChoisie.getStyleClass().add("candidat-card-grid-selected");
+        boutonChoisi.getStyleClass().add("bouton-selection-actif");
+        boutonChoisi.setText("✓ Sélectionné");
+        boutonsParCarte.put(carteChoisie, boutonChoisi);
+
+        candidatSelectionneId = candidatId;
+    }
+
+
 
     @FXML
     private void handleConfirmer() {
-        Toggle selection = groupeCandidats.getSelectedToggle();
-
-        if (selection == null) {
+        if (candidatSelectionneId == null) {
             afficherErreur("Veuillez sélectionner un candidat avant de confirmer.");
             return;
         }
 
-        int candidatId = (int) selection.getUserData();
-
-        // Confirmation explicite avant validation définitive, puisqu'un vote
-        // ne peut jamais être modifié après coup (contrainte du sujet)
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,
                 "Confirmez-vous votre vote ? Ce choix est définitif et ne pourra pas être modifié.");
         confirmation.setHeaderText(null);
 
         confirmation.showAndWait().ifPresent(reponse -> {
             if (reponse == ButtonType.OK) {
-                enregistrerVote(candidatId);
+                enregistrerVote(candidatSelectionneId);
             }
         });
     }

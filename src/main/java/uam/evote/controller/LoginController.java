@@ -80,6 +80,7 @@ public class LoginController {
             stage.setScene(scene);
             stage.setMinWidth(900);
             stage.setMinHeight(600);
+            stage.centerOnScreen();
 
         } catch (IOException e) {
             afficherErreur("Erreur lors du chargement de l'écran suivant.");
@@ -109,7 +110,9 @@ public class LoginController {
 
             Stage popup = new Stage();
             popup.setTitle("Scanner QR Code");
-            popup.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            popup.setScene(scene);
             popup.showAndWait();
 
         } catch (IOException e) {

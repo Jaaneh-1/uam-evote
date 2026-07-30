@@ -47,3 +47,5 @@ src/main/resources/db.properties
 data/photos/
 
 data/votes_en_attente.csv
+
+data/profils/

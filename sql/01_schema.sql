@@ -15,6 +15,7 @@ CREATE TABLE users (
                        departement VARCHAR(100) NULL,
                        ufr VARCHAR(100) NULL,
                        qr_token VARCHAR(64) UNIQUE NULL,
+                       photo VARCHAR(255) NULL,
                        date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
