@@ -18,6 +18,7 @@ public class User {
     private String departement;  // rempli si role = ENSEIGNANT
     private String ufr;
     private String qrToken;
+    private String photo;
 
     // Constructeur vide (nécessaire pour construire l'objet puis le remplir via les setters,
     // notamment quand on lit une ligne de résultat SQL)
@@ -137,6 +138,10 @@ public class User {
     public String getQrToken() { return qrToken; }
 
     public void setQrToken(String qrToken) { this.qrToken = qrToken;}
+
+    public String getPhoto() {return photo;}
+
+    public void setPhoto(String photo) {this.photo = photo;}
 
     @Override
     public String toString() {

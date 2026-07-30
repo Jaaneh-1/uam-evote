@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -16,14 +17,14 @@
     </padding>
 
     <Label fx:id="titreElectionLabel" styleClass="titre" />
-    <Label text="Sélectionnez votre candidat, puis confirmez votre vote." styleClass="sous-titre" />
+    <Label text="Vous ne pouvez sélectionner qu'un seul candidat." styleClass="sous-titre" />
 
-    <ScrollPane fitToWidth="true" prefHeight="300">
-        <VBox fx:id="candidatsContainer" spacing="10">
+    <ScrollPane fitToWidth="true" prefHeight="320" style="-fx-background-color: transparent;">
+        <FlowPane fx:id="candidatsContainer" hgap="16" vgap="16">
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10" />
             </padding>
-        </VBox>
+        </FlowPane>
     </ScrollPane>
 
     <Label fx:id="messageErreur" styleClass="message-erreur" visible="false" managed="false" />

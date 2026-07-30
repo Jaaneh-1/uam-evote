@@ -4,10 +4,12 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -19,16 +21,22 @@
                 <Insets top="30" right="15" bottom="20" left="15" />
             </padding>
 
-            <Label text="UAM e-Vote" styleClass="sidebar-titre" />
+            <HBox spacing="8" alignment="CENTER">
+                <Label text="🗳" styleClass="logo-badge" />
+                <Label text="UAM e-Vote" styleClass="sidebar-titre" />
+            </HBox>
 
             <VBox spacing="8" alignment="CENTER">
-                <Label fx:id="avatarLabel" styleClass="avatar-circle" />
+                <StackPane>
+                    <Label fx:id="avatarLabel" styleClass="avatar-circle" />
+                    <ImageView fx:id="avatarImage" fitWidth="56" fitHeight="56" preserveRatio="false" />
+                </StackPane>
                 <Label fx:id="nomLabel" styleClass="sidebar-nom" />
                 <Label fx:id="roleLabel" styleClass="sidebar-role" />
             </VBox>
 
             <VBox spacing="6" alignment="TOP_LEFT">
-                <Button text="🗳  Mes élections" styleClass="nav-item, nav-item-selected" maxWidth="Infinity" />
+                <Button text="🏠  Mes élections" styleClass="nav-item, nav-item-selected" maxWidth="Infinity" />
             </VBox>
 
             <Region VBox.vgrow="ALWAYS" />
@@ -39,29 +47,52 @@
     </left>
 
     <center>
-        <VBox styleClass="login-container">
-            <padding>
-                <Insets top="30" right="30" bottom="20" left="30" />
-            </padding>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #FBEDE6; -fx-background: #FBEDE6;">
+            <VBox spacing="24" styleClass="login-container">
+                <padding>
+                    <Insets top="30" right="30" bottom="30" left="30" />
+                </padding>
 
-            <HBox alignment="CENTER_LEFT" spacing="15">
                 <VBox spacing="4">
-                    <Label text="Vos élections" styleClass="titre" />
-                    <Label text="Sélectionnez une élection ouverte pour voter" styleClass="sous-titre" />
+                    <Label fx:id="titreAccueilLabel" styleClass="titre" />
+                    <Label text="Voici un aperçu de votre activité de vote" styleClass="sous-titre" />
                 </VBox>
-                <Region HBox.hgrow="ALWAYS" />
-                <Button text="Actualiser" onAction="#handleActualiser" />
-            </HBox>
 
-            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                <FlowPane fx:id="cardsContainer" hgap="18" vgap="18">
-                    <padding>
-                        <Insets top="20" right="0" bottom="20" left="0" />
-                    </padding>
-                </FlowPane>
-            </ScrollPane>
+                <!-- Carte élection en vedette -->
+                <VBox fx:id="carteVedette" spacing="10" styleClass="carte-vedette">
+                    <Label text="ÉLECTION À NE PAS MANQUER" styleClass="carte-vedette-label" />
+                    <Label fx:id="vedetteTitreLabel" styleClass="carte-vedette-titre" />
+                    <Label fx:id="vedetteSousLabel" styleClass="carte-vedette-sous" />
+                    <Button fx:id="vedetteBouton" text="Voter maintenant" styleClass="bouton-principal" />
+                </VBox>
 
-        </VBox>
+                <!-- Statistiques -->
+                <HBox spacing="16">
+                    <VBox styleClass="stat-card" spacing="4">
+                        <Label fx:id="statOuvertesLabel" styleClass="stat-valeur" />
+                        <Label text="Élections ouvertes pour vous" styleClass="stat-label" wrapText="true" />
+                    </VBox>
+                    <VBox styleClass="stat-card" spacing="4">
+                        <Label fx:id="statVotesLabel" styleClass="stat-valeur" />
+                        <Label text="Votes déjà exprimés" styleClass="stat-label" wrapText="true" />
+                    </VBox>
+                    <VBox styleClass="stat-card" spacing="4">
+                        <Label fx:id="statEnAttenteLabel" styleClass="stat-valeur" />
+                        <Label text="En attente de votre vote" styleClass="stat-label" wrapText="true" />
+                    </VBox>
+                </HBox>
+
+                <!-- Toutes les élections -->
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Toutes vos élections" styleClass="titre" style="-fx-font-size: 18px;" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button text="Actualiser" onAction="#handleActualiser" />
+                </HBox>
+
+                <FlowPane fx:id="cardsContainer" hgap="18" vgap="18" />
+
+            </VBox>
+        </ScrollPane>
     </center>
 
 </BorderPane>

@@ -220,7 +220,9 @@ public class AdminDashboardController {
 
             Stage popup = new Stage();
             popup.setTitle(userAModifier == null ? "Ajouter un utilisateur" : "Modifier l'utilisateur");
-            popup.setScene(new javafx.scene.Scene(root));
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            popup.setScene(scene);
             popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             popup.showAndWait();
 
@@ -294,7 +296,9 @@ public class AdminDashboardController {
 
             Stage popup = new Stage();
             popup.setTitle(electionAModifier == null ? "Créer une élection" : "Modifier l'élection");
-            popup.setScene(new javafx.scene.Scene(root));
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            popup.setScene(scene);
             popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             popup.showAndWait();
 
@@ -409,7 +413,9 @@ public class AdminDashboardController {
 
             Stage popup = new Stage();
             popup.setTitle(candidatAModifier == null ? "Ajouter un candidat" : "Modifier le candidat");
-            popup.setScene(new javafx.scene.Scene(root));
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            popup.setScene(scene);
             popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             popup.showAndWait();
 
@@ -456,7 +462,9 @@ public class AdminDashboardController {
 
             Stage popup = new Stage();
             popup.setTitle("Résultats - " + selection.getTitre());
-            popup.setScene(new javafx.scene.Scene(root, 820, 500));
+            javafx.scene.Scene scene = new javafx.scene.Scene(root, 820, 500);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            popup.setScene(scene);
             popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             popup.showAndWait();
 
@@ -533,7 +541,9 @@ public class AdminDashboardController {
 
             Stage popup = new Stage();
             popup.setTitle("Résultats - " + selection.getTitre());
-            popup.setScene(new javafx.scene.Scene(root, 820, 500));
+            javafx.scene.Scene scene = new javafx.scene.Scene(root, 820, 500);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            popup.setScene(scene);
             popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             popup.showAndWait();
 

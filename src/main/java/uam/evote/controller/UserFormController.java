@@ -3,14 +3,27 @@ package uam.evote.controller;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import uam.evote.model.User;
 import uam.evote.service.UserService;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 public class UserFormController {
 
     @FXML
     private Label titreLabel;
+    @FXML
+    private ImageView photoPreview;
     @FXML
     private TextField matriculeField;
     @FXML
@@ -34,8 +47,9 @@ public class UserFormController {
 
     private final UserService userService = new UserService();
 
-    private User userEnEdition; // null si on est en mode "Ajout"
-    private Runnable onSuccess; // callback pour rafraîchir la liste après succès
+    private User userEnEdition;
+    private Runnable onSuccess;
+    private String cheminPhotoChoisie;
 
     @FXML
     public void initialize() {
@@ -46,10 +60,6 @@ public class UserFormController {
         this.onSuccess = callback;
     }
 
-    /**
-     * Prépare le formulaire en mode "Modification", pré-rempli avec les données existantes.
-     * Ne pas appeler cette méthode = mode "Ajout" (formulaire vide).
-     */
     public void setUserEnEdition(User user) {
         this.userEnEdition = user;
         titreLabel.setText("Modifier l'utilisateur");
@@ -64,9 +74,52 @@ public class UserFormController {
                 user.getRole() == User.Role.ETUDIANT ? user.getClasse() : user.getDepartement()
         );
         ufrField.setText(user.getUfr());
+        cheminPhotoChoisie = user.getPhoto();
 
-        // En modification, le mot de passe reste optionnel (on ne le change que si rempli)
         passwordField.setPromptText("Laisser vide pour ne pas changer");
+        afficherPhoto(cheminPhotoChoisie);
+    }
+
+    @FXML
+    private void handleChoisirPhoto() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choisir une photo de profil");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
+        );
+
+        File fichierChoisi = fileChooser.showOpenDialog(nomField.getScene().getWindow());
+        if (fichierChoisi == null) {
+            return;
+        }
+
+        try {
+            Path dossierPhotos = Paths.get("data", "profils");
+            Files.createDirectories(dossierPhotos);
+
+            String extension = fichierChoisi.getName().substring(fichierChoisi.getName().lastIndexOf('.'));
+            String nomFichierUnique = UUID.randomUUID() + extension;
+            Path destination = dossierPhotos.resolve(nomFichierUnique);
+
+            Files.copy(fichierChoisi.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+            cheminPhotoChoisie = destination.toString();
+            afficherPhoto(cheminPhotoChoisie);
+
+        } catch (IOException e) {
+            afficherErreur("Erreur lors de la copie de la photo.");
+        }
+    }
+
+    private void afficherPhoto(String chemin) {
+        if (chemin == null || chemin.isBlank()) {
+            photoPreview.setImage(null);
+            return;
+        }
+        File fichier = new File(chemin);
+        if (fichier.exists()) {
+            photoPreview.setImage(new Image(fichier.toURI().toString()));
+        }
     }
 
     @FXML
@@ -106,7 +159,6 @@ public class UserFormController {
         User user = construireUserDepuisFormulaire();
         user.setId(userEnEdition.getId());
         userService.modifierUtilisateur(user);
-        // Note : le changement de mot de passe en modification sera ajouté ultérieurement si besoin
     }
 
     private User construireUserDepuisFormulaire() {
@@ -118,6 +170,7 @@ public class UserFormController {
         user.setLogin(loginField.getText().trim());
         user.setRole(roleCombo.getValue());
         user.setUfr(ufrField.getText().trim());
+        user.setPhoto(cheminPhotoChoisie);
 
         if (roleCombo.getValue() == User.Role.ETUDIANT) {
             user.setClasse(classeDeptField.getText().trim());

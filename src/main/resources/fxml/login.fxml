@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="uam.evote.controller.LoginController" styleClass="login-container">
@@ -18,7 +19,10 @@
             <Insets top="40" right="40" bottom="40" left="40" />
         </padding>
 
-        <Label text="UAM e-Vote" styleClass="titre" />
+        <HBox spacing="8" alignment="CENTER">
+            <Label text="🗳" styleClass="logo-badge" />
+            <Label text="UAM e-Vote" styleClass="titre" />
+        </HBox>
         <Label text="Connectez-vous pour continuer" styleClass="sous-titre" />
 
         <TextField fx:id="loginField" promptText="Login" maxWidth="250" />

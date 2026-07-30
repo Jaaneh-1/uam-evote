@@ -12,8 +12,8 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public int ajouter(User user) {
-        String sql = "INSERT INTO users (matricule, nom, prenom, email, login, password, role, classe, departement, ufr) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (matricule, nom, prenom, email, login, password, role, classe, departement, ufr, photo) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -28,10 +28,10 @@ public class UserDAOImpl implements UserDAO {
             ps.setString(8, user.getClasse());
             ps.setString(9, user.getDepartement());
             ps.setString(10, user.getUfr());
+            ps.setString(11, user.getPhoto());
 
             ps.executeUpdate();
 
-            // Récupère l'id auto-généré par MySQL pour le renvoyer
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
                     return keys.getInt(1);
@@ -47,7 +47,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public void modifier(User user) {
         String sql = "UPDATE users SET matricule=?, nom=?, prenom=?, email=?, login=?, " +
-                "role=?, classe=?, departement=?, ufr=? WHERE id=?";
+                "role=?, classe=?, departement=?, ufr=?, photo=? WHERE id=?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -61,7 +61,8 @@ public class UserDAOImpl implements UserDAO {
             ps.setString(7, user.getClasse());
             ps.setString(8, user.getDepartement());
             ps.setString(9, user.getUfr());
-            ps.setInt(10, user.getId());
+            ps.setString(10, user.getPhoto());
+            ps.setInt(11, user.getId());
 
             ps.executeUpdate();
 
@@ -186,6 +187,7 @@ public class UserDAOImpl implements UserDAO {
         user.setDepartement(rs.getString("departement"));
         user.setUfr(rs.getString("ufr"));
         user.setQrToken(rs.getString("qr_token"));
+        user.setPhoto(rs.getString("photo"));
         return user;
     }
 
