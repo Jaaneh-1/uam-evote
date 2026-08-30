@@ -121,10 +121,23 @@ public class Election {
 
     /**
      * Vérifie si un utilisateur donné a le droit de voter à cette élection,
-     * en fonction de son rôle et de sa classe/département/UFR.
-     * C'est ici qu'on implémente les "Cas 1, 2, 3" du sujet.
+     * en fonction de son rôle ET de sa classe/département/UFR.
+     * C'est ici qu'on implémente les "Cas 1, 2, 3" du sujet : la cible (classe,
+     * département, UFR) ne suffit pas, le rôle attendu pour ce type d'élection
+     * doit aussi correspondre (ex: seuls les enseignants votent pour un Directeur d'UFR).
      */
     public boolean estEligible(User user) {
+        if (!cibleCorrespond(user)) {
+            return false;
+        }
+        return switch (typeElection) {
+            case DELEGUE -> user.getRole() == User.Role.ETUDIANT;
+            case CHEF_DEPARTEMENT, DIRECTEUR_UFR, DIRECTEUR_ADJOINT_UFR -> user.getRole() == User.Role.ENSEIGNANT;
+            case REPRESENTANT -> true;
+        };
+    }
+
+    private boolean cibleCorrespond(User user) {
         return switch (cibleType) {
             case CLASSE -> user.getClasse() != null && user.getClasse().equalsIgnoreCase(cibleValeur);
             case DEPARTEMENT -> user.getDepartement() != null && user.getDepartement().equalsIgnoreCase(cibleValeur);
