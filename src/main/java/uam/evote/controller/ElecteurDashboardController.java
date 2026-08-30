@@ -56,6 +56,9 @@ public class ElecteurDashboardController {
     @FXML
     private FlowPane cardsContainer;
 
+    @FXML
+    private FlowPane cardsContainerTerminees;
+
     private final VoteService voteService = new VoteService();
     private User utilisateurConnecte;
 
@@ -68,6 +71,11 @@ public class ElecteurDashboardController {
 
         configurerAvatar(user);
         chargerElections();
+
+        configurerAvatar(user);
+        chargerElections();
+        chargerElectionsTerminees();
+
     }
 
     private void configurerAvatar(User user) {
@@ -166,9 +174,74 @@ public class ElecteurDashboardController {
         return carte;
     }
 
+    private void chargerElectionsTerminees() {
+        cardsContainerTerminees.getChildren().clear();
+
+        List<Election> electionsTerminees = voteService.listerElectionsTermineesEligibles(utilisateurConnecte);
+
+        if (electionsTerminees.isEmpty()) {
+            Label vide = new Label("Aucune élection terminée pour le moment.");
+            vide.setStyle("-fx-text-fill: #A9776A; -fx-font-size: 13px;");
+            cardsContainerTerminees.getChildren().add(vide);
+            return;
+        }
+
+        for (Election election : electionsTerminees) {
+            cardsContainerTerminees.getChildren().add(creerCarteElectionTerminee(election));
+        }
+    }
+
+    private VBox creerCarteElectionTerminee(Election election) {
+        Label titre = new Label(election.getTitre());
+        titre.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #7A3E2E;");
+        titre.setWrapText(true);
+
+        Label type = new Label(election.getTypeElection().name());
+        type.setStyle("-fx-font-size: 11px; -fx-text-fill: #A9776A;");
+
+        Label cloture = new Label("Clôturée le "
+                + election.getDateFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm")));
+        cloture.setStyle("-fx-font-size: 11px; -fx-text-fill: #A9776A;");
+
+        Button boutonResultats = new Button("Voir résultats");
+        boutonResultats.setMaxWidth(Double.MAX_VALUE);
+        boutonResultats.getStyleClass().add("bouton-principal");
+        boutonResultats.setOnAction(e -> ouvrirResultats(election));
+
+        Region spacer = new Region();
+
+        VBox carte = new VBox(8, titre, type, cloture, spacer, boutonResultats);
+        carte.getStyleClass().add("election-card");
+        carte.setPrefWidth(260);
+
+        return carte;
+    }
+
+    private void ouvrirResultats(Election election) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/resultats.fxml"));
+            Parent root = loader.load();
+
+            ResultatsController controller = loader.getController();
+            controller.initData(election);
+
+            Stage popup = new Stage();
+            popup.setTitle("Résultats - " + election.getTitre());
+            Scene scene = new Scene(root, 820, 500);
+            scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+            popup.setScene(scene);
+            popup.initModality(Modality.APPLICATION_MODAL);
+            popup.showAndWait();
+
+        } catch (java.io.IOException e) {
+            afficherErreurChargement();
+        }
+    }
+
     @FXML
     private void handleActualiser() {
         chargerElections();
+        chargerElectionsTerminees();
     }
 
     private void ouvrirFormulaireVote(Election election) {

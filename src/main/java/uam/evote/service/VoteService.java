@@ -34,6 +34,17 @@ public class VoteService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retourne toutes les élections FERMEES où l'utilisateur était éligible pour voter,
+     * afin qu'il puisse consulter les résultats publiés (exigence du cahier des charges).
+     */
+    public List<Election> listerElectionsTermineesEligibles(User user) {
+        return electionDAO.trouverParStatut(Election.Statut.FERMEE).stream()
+                .filter(election -> election.estEligible(user))
+                .collect(Collectors.toList());
+    }
+
+
     public boolean aDejaVote(int electionId, int utilisateurId) {
         return voteDAO.aDejaVote(electionId, utilisateurId);
     }
