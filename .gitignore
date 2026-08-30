@@ -49,3 +49,5 @@ data/photos/
 data/votes_en_attente.csv
 
 data/profils/
+
+data/candidats_cache.csv
