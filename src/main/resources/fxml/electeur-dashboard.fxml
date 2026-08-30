@@ -91,6 +91,13 @@
 
                 <FlowPane fx:id="cardsContainer" hgap="18" vgap="18" />
 
+                <!-- Élections terminées : accès aux résultats publiés -->
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Élections terminées" styleClass="titre" style="-fx-font-size: 18px;" />
+                </HBox>
+
+                <FlowPane fx:id="cardsContainerTerminees" hgap="18" vgap="18" />
+
             </VBox>
         </ScrollPane>
     </center>
