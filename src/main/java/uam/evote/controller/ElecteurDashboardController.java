@@ -23,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import uam.evote.utils.OfflineVoteQueue;
 
 public class ElecteurDashboardController {
 
@@ -93,22 +94,26 @@ public class ElecteurDashboardController {
         }
     }
 
+
     private void chargerElections() {
         cardsContainer.getChildren().clear();
 
         List<Election> elections = voteService.listerElectionsEligibles(utilisateurConnecte);
+        OfflineVoteQueue queue = new OfflineVoteQueue();
 
         int nbVotes = 0;
         Election prochaineAVoter = null;
 
         for (Election election : elections) {
             boolean dejaVote = voteService.aDejaVote(election.getId(), utilisateurConnecte.getId());
-            if (dejaVote) {
+            boolean enAttenteSynchro = !dejaVote && queue.dejaEnAttente(election.getId(), utilisateurConnecte.getId());
+
+            if (dejaVote || enAttenteSynchro) {
                 nbVotes++;
             } else if (prochaineAVoter == null || election.getDateFin().isBefore(prochaineAVoter.getDateFin())) {
                 prochaineAVoter = election;
             }
-            cardsContainer.getChildren().add(creerCarteElection(election, dejaVote));
+            cardsContainer.getChildren().add(creerCarteElection(election, dejaVote, enAttenteSynchro));
         }
 
         // Statistiques
@@ -144,7 +149,7 @@ public class ElecteurDashboardController {
         vedetteBouton.setOnAction(e -> ouvrirFormulaireVote(finalElection));
     }
 
-    private VBox creerCarteElection(Election election, boolean dejaVote) {
+    private VBox creerCarteElection(Election election, boolean dejaVote, boolean enAttenteSynchro) {
         Label titre = new Label(election.getTitre());
         titre.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #7A3E2E;");
         titre.setWrapText(true);
@@ -156,13 +161,20 @@ public class ElecteurDashboardController {
                 + election.getDateFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         dateFin.setStyle("-fx-font-size: 11px; -fx-text-fill: #A9776A;");
 
-        Label badge = new Label(dejaVote ? "Déjà voté ✓" : "Vous pouvez voter");
-        badge.getStyleClass().add(dejaVote ? "badge-succes" : "badge-attente");
+        boolean bloque = dejaVote || enAttenteSynchro;
+        String texteBadge = dejaVote ? "Déjà voté ✓"
+                : enAttenteSynchro ? "Vote en attente de synchro ⏳"
+                  : "Vous pouvez voter";
+        Label badge = new Label(texteBadge);
+        badge.getStyleClass().add(bloque ? "badge-succes" : "badge-attente");
 
-        Button boutonVoter = new Button(dejaVote ? "Déjà voté" : "Voter");
-        boutonVoter.setDisable(dejaVote);
+        String texteBouton = dejaVote ? "Déjà voté"
+                : enAttenteSynchro ? "En attente de synchro"
+                  : "Voter";
+        Button boutonVoter = new Button(texteBouton);
+        boutonVoter.setDisable(bloque);
         boutonVoter.setMaxWidth(Double.MAX_VALUE);
-        boutonVoter.getStyleClass().add(dejaVote ? "button" : "bouton-principal");
+        boutonVoter.getStyleClass().add(bloque ? "button" : "bouton-principal");
         boutonVoter.setOnAction(e -> ouvrirFormulaireVote(election));
 
         Region spacer = new Region();

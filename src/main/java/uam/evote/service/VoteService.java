@@ -50,7 +50,18 @@ public class VoteService {
     }
 
     public List<Candidat> listerCandidats(int electionId) {
-        return candidatDAO.trouverParElection(electionId);
+        uam.evote.utils.CandidatCache cache = new uam.evote.utils.CandidatCache();
+        try {
+            List<Candidat> candidats = candidatDAO.trouverParElection(electionId);
+            cache.sauvegarder(electionId, candidats);
+            return candidats;
+        } catch (RuntimeException e) {
+            List<Candidat> candidatsEnCache = cache.listerParElection(electionId);
+            if (candidatsEnCache.isEmpty()) {
+                throw e;
+            }
+            return candidatsEnCache;
+        }
     }
 
     /**
