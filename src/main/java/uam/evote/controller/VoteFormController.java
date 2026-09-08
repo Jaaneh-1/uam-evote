@@ -29,6 +29,8 @@ public class VoteFormController {
     private FlowPane candidatsContainer;
     @FXML
     private Label messageErreur;
+    @FXML
+    private VBox rootBox;
 
     private final VoteService voteService = new VoteService();
 
@@ -38,6 +40,8 @@ public class VoteFormController {
 
     private final List<VBox> cartesCandidats = new ArrayList<>();
     private Integer candidatSelectionneId = null;
+
+    private final java.util.Map<Integer, Candidat> candidatsParId = new java.util.HashMap<>();
 
     public void setOnSuccess(Runnable callback) {
         this.onSuccess = callback;
@@ -57,6 +61,7 @@ public class VoteFormController {
         List<Candidat> candidats = voteService.listerCandidats(election.getId());
 
         for (Candidat candidat : candidats) {
+            candidatsParId.put(candidat.getId(), candidat);
             VBox carte = creerCarteCandidat(candidat);
             cartesCandidats.add(carte);
             candidatsContainer.getChildren().add(carte);
@@ -148,15 +153,7 @@ public class VoteFormController {
 
         try {
             voteService.voter(electeur, election.getId(), candidatId);
-
-            Alert succes = new Alert(Alert.AlertType.INFORMATION, "Votre vote a bien été enregistré. Merci !");
-            succes.setHeaderText(null);
-            succes.showAndWait();
-
-            if (onSuccess != null) {
-                onSuccess.run();
-            }
-            fermerFenetre();
+            afficherConfirmation(candidatsParId.get(candidatId), false);
 
         } catch (IllegalStateException e) {
             afficherErreur(e.getMessage());
@@ -173,16 +170,45 @@ public class VoteFormController {
 
         queue.ajouter(election.getId(), candidatId, electeur.getId());
 
-        Alert info = new Alert(Alert.AlertType.INFORMATION,
-                "Connexion au serveur indisponible. Votre vote a été enregistré localement "
-                        + "et sera transmis automatiquement dès le retour de la connexion.");
-        info.setHeaderText(null);
-        info.showAndWait();
+        afficherConfirmation(candidatsParId.get(candidatId), true);
+    }
 
-        if (onSuccess != null) {
-            onSuccess.run();
-        }
-        fermerFenetre();
+    private void afficherConfirmation(Candidat candidat, boolean horsLigne) {
+        Label icone = new Label(horsLigne ? "⏳" : "✓");
+        icone.getStyleClass().add(horsLigne ? "icone-confirmation-attente" : "icone-confirmation-succes");
+        icone.setAlignment(javafx.geometry.Pos.CENTER);
+
+        Label titre = new Label(horsLigne ? "Vote enregistré localement" : "Vote enregistré !");
+        titre.getStyleClass().add("titre");
+
+        String texteCandidat = candidat != null ? candidat.getNomComplet() : "le candidat sélectionné";
+        Label recap = new Label("Vous avez voté pour " + texteCandidat + "\nà l'élection " + election.getTitre() + ".");
+        recap.getStyleClass().add("sous-titre");
+        recap.setWrapText(true);
+        recap.setStyle("-fx-text-alignment: center;");
+        recap.setAlignment(javafx.geometry.Pos.CENTER);
+
+        Label info = new Label(horsLigne
+                ? "Connexion au serveur indisponible : votre vote sera transmis automatiquement dès le retour de la connexion."
+                : "Votre choix a bien été pris en compte. Merci d'avoir participé au scrutin.");
+        info.setWrapText(true);
+        info.setStyle("-fx-text-fill: #A9776A; -fx-font-size: 12px; -fx-text-alignment: center;");
+        info.setAlignment(javafx.geometry.Pos.CENTER);
+
+        Button boutonFermer = new Button("Fermer");
+        boutonFermer.getStyleClass().add("bouton-principal");
+        boutonFermer.setOnAction(e -> {
+            if (onSuccess != null) {
+                onSuccess.run();
+            }
+            fermerFenetre();
+        });
+
+        VBox panneau = new VBox(14, icone, titre, recap, info, boutonFermer);
+        panneau.setAlignment(javafx.geometry.Pos.CENTER);
+        panneau.setPadding(new Insets(30, 20, 10, 20));
+
+        rootBox.getChildren().setAll(panneau);
     }
 
     @FXML
@@ -191,7 +217,7 @@ public class VoteFormController {
     }
 
     private void fermerFenetre() {
-        Stage stage = (Stage) titreElectionLabel.getScene().getWindow();
+        Stage stage = (Stage) rootBox.getScene().getWindow();
         stage.close();
     }
 

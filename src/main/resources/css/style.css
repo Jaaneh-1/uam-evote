@@ -276,6 +276,32 @@
     -fx-background-radius: 20;
 }
 
+.icone-confirmation-succes {
+    -fx-background-color: #D8ECD9;
+    -fx-background-radius: 50%;
+    -fx-min-width: 80;
+    -fx-min-height: 80;
+    -fx-max-width: 80;
+    -fx-max-height: 80;
+    -fx-alignment: center;
+    -fx-text-fill: #2F7A3C;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
+
+.icone-confirmation-attente {
+    -fx-background-color: #FBE3D4;
+    -fx-background-radius: 50%;
+    -fx-min-width: 80;
+    -fx-min-height: 80;
+    -fx-max-width: 80;
+    -fx-max-height: 80;
+    -fx-alignment: center;
+    -fx-text-fill: #C1442E;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
+
 /* ===== Logo ===== */
 
 .logo-badge {

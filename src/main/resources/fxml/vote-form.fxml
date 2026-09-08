@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="15" styleClass="login-container"
+<VBox fx:id="rootBox" spacing="15" styleClass="login-container"
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="uam.evote.controller.VoteFormController">
 
