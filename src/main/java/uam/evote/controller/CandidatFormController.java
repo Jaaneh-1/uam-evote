@@ -1,6 +1,8 @@
 package uam.evote.controller;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -8,8 +10,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import uam.evote.model.Candidat;
+import uam.evote.model.Election;
+import uam.evote.model.User;
 import uam.evote.service.CandidatService;
+import uam.evote.service.ElectionService;
+import uam.evote.service.UserService;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class CandidatFormController {
@@ -26,9 +35,7 @@ public class CandidatFormController {
     @FXML
     private ImageView photoPreview;
     @FXML
-    private TextField nomField;
-    @FXML
-    private TextField prenomField;
+    private ComboBox<User> utilisateurCombo;
     @FXML
     private TextField professionField;
     @FXML
@@ -37,10 +44,13 @@ public class CandidatFormController {
     private Label messageErreur;
 
     private final CandidatService candidatService = new CandidatService();
+    private final UserService userService = new UserService();
+    private final ElectionService electionService = new ElectionService();
 
     private Candidat candidatEnEdition;
     private Runnable onSuccess;
     private int electionId;
+    private Election election;
     private String cheminPhotoChoisie;
 
     public void setOnSuccess(Runnable callback) {
@@ -49,14 +59,69 @@ public class CandidatFormController {
 
     public void setElectionId(int electionId) {
         this.electionId = electionId;
+        this.election = electionService.trouverParId(electionId).orElse(null);
+        chargerUtilisateursEligibles();
+    }
+
+    @FXML
+    public void initialize() {
+        utilisateurCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(User user) {
+                if (user == null) return "";
+                return user.getPrenom() + " " + user.getNom() + " (" + user.getMatricule() + ")";
+            }
+
+            @Override
+            public User fromString(String s) {
+                return null;
+            }
+        });
+
+        // Petit confort : quand on choisit un utilisateur, on reprend sa photo de compte
+        // par défaut (l'admin peut toujours la remplacer via "Choisir une photo").
+        utilisateurCombo.valueProperty().addListener((obs, ancien, nouveau) -> {
+            if (nouveau != null && (cheminPhotoChoisie == null || cheminPhotoChoisie.isBlank())) {
+                cheminPhotoChoisie = nouveau.getPhoto();
+                afficherPhoto(cheminPhotoChoisie);
+            }
+        });
+    }
+
+    /**
+     * Ne propose comme candidats possibles que des utilisateurs réellement éligibles
+     * à voter à cette élection (même règle que VoteService.voter() via Election.estEligible) :
+     * un candidat doit appartenir à la classe/département/UFR ciblée, avec le bon rôle.
+     * Un administrateur n'est jamais proposé, quel que soit le type d'élection.
+     */
+    private void chargerUtilisateursEligibles() {
+        if (election == null) {
+            return;
+        }
+
+        List<User> eligibles = new ArrayList<>();
+        for (User user : userService.listerTous()) {
+            if (user.getRole() != User.Role.ADMIN && election.estEligible(user)) {
+                eligibles.add(user);
+            }
+        }
+
+        utilisateurCombo.setItems(FXCollections.observableArrayList(eligibles));
     }
 
     public void setCandidatEnEdition(Candidat candidat) {
         this.candidatEnEdition = candidat;
         titreLabel.setText("Modifier le candidat");
 
-        nomField.setText(candidat.getNom());
-        prenomField.setText(candidat.getPrenom());
+        userService.trouverParId(candidat.getUserId()).ifPresent(user -> {
+            boolean dejaPresent = utilisateurCombo.getItems().stream()
+                    .anyMatch(u -> u.getId() == user.getId());
+            if (!dejaPresent) {
+                utilisateurCombo.getItems().add(user);
+            }
+            utilisateurCombo.setValue(user);
+        });
+
         professionField.setText(candidat.getProfession());
         programmeArea.setText(candidat.getProgramme());
         cheminPhotoChoisie = candidat.getPhoto();
@@ -72,13 +137,12 @@ public class CandidatFormController {
                 new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
         );
 
-        File fichierChoisi = fileChooser.showOpenDialog(nomField.getScene().getWindow());
+        File fichierChoisi = fileChooser.showOpenDialog(utilisateurCombo.getScene().getWindow());
         if (fichierChoisi == null) {
             return;
         }
 
         try {
-            // Dossier local où on stocke toutes les photos de candidats (créé s'il n'existe pas)
             Path dossierPhotos = Paths.get("data", "photos");
             Files.createDirectories(dossierPhotos);
 
@@ -109,15 +173,18 @@ public class CandidatFormController {
 
     @FXML
     private void handleEnregistrer() {
-        if (nomField.getText().isBlank() || prenomField.getText().isBlank()) {
-            afficherErreur("Le nom et le prénom sont obligatoires.");
+        if (utilisateurCombo.getValue() == null) {
+            afficherErreur("Veuillez sélectionner un utilisateur.");
             return;
         }
 
         try {
+            User utilisateur = utilisateurCombo.getValue();
+
             Candidat candidat = new Candidat();
-            candidat.setNom(nomField.getText().trim());
-            candidat.setPrenom(prenomField.getText().trim());
+            candidat.setUserId(utilisateur.getId());
+            candidat.setNom(utilisateur.getNom());
+            candidat.setPrenom(utilisateur.getPrenom());
             candidat.setProfession(professionField.getText().trim());
             candidat.setProgramme(programmeArea.getText().trim());
             candidat.setPhoto(cheminPhotoChoisie);
@@ -147,7 +214,7 @@ public class CandidatFormController {
     }
 
     private void fermerFenetre() {
-        Stage stage = (Stage) nomField.getScene().getWindow();
+        Stage stage = (Stage) utilisateurCombo.getScene().getWindow();
         stage.close();
     }
 

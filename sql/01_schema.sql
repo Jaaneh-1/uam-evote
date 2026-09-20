@@ -38,12 +38,15 @@ CREATE TABLE elections (
 CREATE TABLE candidats (
                            id INT AUTO_INCREMENT PRIMARY KEY,
                            election_id INT NOT NULL,
+                           user_id INT NOT NULL,
                            nom VARCHAR(50) NOT NULL,
                            prenom VARCHAR(50) NOT NULL,
                            photo VARCHAR(255),
                            profession VARCHAR(100),
                            programme TEXT,
-                           FOREIGN KEY (election_id) REFERENCES elections(id) ON DELETE CASCADE
+                           FOREIGN KEY (election_id) REFERENCES elections(id) ON DELETE CASCADE,
+                           FOREIGN KEY (user_id) REFERENCES users(id),
+                           UNIQUE (election_id, user_id)
 );
 
 CREATE TABLE votes (

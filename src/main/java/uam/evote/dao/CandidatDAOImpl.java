@@ -12,18 +12,19 @@ public class CandidatDAOImpl implements CandidatDAO {
 
     @Override
     public int ajouter(Candidat candidat) {
-        String sql = "INSERT INTO candidats (election_id, nom, prenom, photo, profession, programme) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO candidats (election_id, user_id, nom, prenom, photo, profession, programme) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, candidat.getElectionId());
-            ps.setString(2, candidat.getNom());
-            ps.setString(3, candidat.getPrenom());
-            ps.setString(4, candidat.getPhoto());
-            ps.setString(5, candidat.getProfession());
-            ps.setString(6, candidat.getProgramme());
+            ps.setInt(2, candidat.getUserId());
+            ps.setString(3, candidat.getNom());
+            ps.setString(4, candidat.getPrenom());
+            ps.setString(5, candidat.getPhoto());
+            ps.setString(6, candidat.getProfession());
+            ps.setString(7, candidat.getProgramme());
 
             ps.executeUpdate();
 
@@ -34,6 +35,8 @@ public class CandidatDAOImpl implements CandidatDAO {
             }
             return -1;
 
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new IllegalArgumentException("Cet utilisateur est déjà candidat à cette élection.");
         } catch (SQLException e) {
             throw new RuntimeException("Erreur lors de l'ajout du candidat", e);
         }
@@ -41,20 +44,23 @@ public class CandidatDAOImpl implements CandidatDAO {
 
     @Override
     public void modifier(Candidat candidat) {
-        String sql = "UPDATE candidats SET nom=?, prenom=?, photo=?, profession=?, programme=? WHERE id=?";
+        String sql = "UPDATE candidats SET user_id=?, nom=?, prenom=?, photo=?, profession=?, programme=? WHERE id=?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, candidat.getNom());
-            ps.setString(2, candidat.getPrenom());
-            ps.setString(3, candidat.getPhoto());
-            ps.setString(4, candidat.getProfession());
-            ps.setString(5, candidat.getProgramme());
-            ps.setInt(6, candidat.getId());
+            ps.setInt(1, candidat.getUserId());
+            ps.setString(2, candidat.getNom());
+            ps.setString(3, candidat.getPrenom());
+            ps.setString(4, candidat.getPhoto());
+            ps.setString(5, candidat.getProfession());
+            ps.setString(6, candidat.getProgramme());
+            ps.setInt(7, candidat.getId());
 
             ps.executeUpdate();
 
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new IllegalArgumentException("Cet utilisateur est déjà candidat à cette élection.");
         } catch (SQLException e) {
             throw new RuntimeException("Erreur lors de la modification du candidat", e);
         }
@@ -122,6 +128,7 @@ public class CandidatDAOImpl implements CandidatDAO {
         Candidat candidat = new Candidat();
         candidat.setId(rs.getInt("id"));
         candidat.setElectionId(rs.getInt("election_id"));
+        candidat.setUserId(rs.getInt("user_id"));
         candidat.setNom(rs.getString("nom"));
         candidat.setPrenom(rs.getString("prenom"));
         candidat.setPhoto(rs.getString("photo"));

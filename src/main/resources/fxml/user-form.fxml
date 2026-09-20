@@ -45,11 +45,14 @@
             <Label text="Rôle :" GridPane.rowIndex="6" GridPane.columnIndex="0" />
             <ComboBox fx:id="roleCombo" GridPane.rowIndex="6" GridPane.columnIndex="1" />
 
-            <Label text="Classe/Département :" GridPane.rowIndex="7" GridPane.columnIndex="0" />
-            <TextField fx:id="classeDeptField" GridPane.rowIndex="7" GridPane.columnIndex="1" />
+            <Label text="UFR :" GridPane.rowIndex="7" GridPane.columnIndex="0" />
+            <ComboBox fx:id="ufrCombo" GridPane.rowIndex="7" GridPane.columnIndex="1" />
 
-            <Label text="UFR :" GridPane.rowIndex="8" GridPane.columnIndex="0" />
-            <TextField fx:id="ufrField" GridPane.rowIndex="8" GridPane.columnIndex="1" />
+            <Label fx:id="departementLabel" text="Département :" GridPane.rowIndex="8" GridPane.columnIndex="0" />
+            <ComboBox fx:id="departementCombo" GridPane.rowIndex="8" GridPane.columnIndex="1" />
+
+            <Label fx:id="classeLabel" text="Classe :" GridPane.rowIndex="9" GridPane.columnIndex="0" />
+            <ComboBox fx:id="classeCombo" GridPane.rowIndex="9" GridPane.columnIndex="1" />
         </GridPane>
     </HBox>
 
