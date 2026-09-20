@@ -73,6 +73,9 @@
                                 <Insets top="15" right="15" bottom="10" left="15" />
                             </padding>
                             <Label text="Gestion des élections" styleClass="sous-titre" />
+                            <HBox alignment="CENTER_LEFT">
+                                <Button text="Actualiser" onAction="#handleActualiserElections" />
+                            </HBox>
                         </VBox>
                     </top>
                     <center>
@@ -116,6 +119,7 @@
                             <HBox spacing="10" alignment="CENTER_LEFT">
                                 <Label text="Élection :" />
                                 <ComboBox fx:id="electionCandidatsCombo" prefWidth="300" onAction="#handleChangerElectionCandidats" />
+                                <Button text="Actualiser" onAction="#handleActualiserCandidats" />
                             </HBox>
                         </VBox>
                     </top>
@@ -151,6 +155,9 @@
                                 <Insets top="15" right="15" bottom="10" left="15" />
                             </padding>
                             <Label text="Historique des élections terminées" styleClass="sous-titre" />
+                            <HBox alignment="CENTER_LEFT">
+                                <Button text="Actualiser" onAction="#handleActualiserHistorique" />
+                            </HBox>
                         </VBox>
                     </top>
                     <center>

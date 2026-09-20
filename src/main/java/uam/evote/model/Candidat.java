@@ -4,6 +4,7 @@ public class Candidat {
 
     private int id;
     private int electionId;
+    private int userId;
     private String nom;
     private String prenom;
     private String photo;       // chemin/nom du fichier image
@@ -39,6 +40,14 @@ public class Candidat {
 
     public void setElectionId(int electionId) {
         this.electionId = electionId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getNom() {

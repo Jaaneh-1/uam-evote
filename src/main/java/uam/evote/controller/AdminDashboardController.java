@@ -180,6 +180,22 @@ public class AdminDashboardController {
     }
 
     @FXML
+    private void handleActualiserElections() {
+        chargerElections();
+    }
+
+    @FXML
+    private void handleActualiserCandidats() {
+        electionCandidatsCombo.setItems(FXCollections.observableArrayList(electionService.listerToutes()));
+        chargerCandidats();
+    }
+
+    @FXML
+    private void handleActualiserHistorique() {
+        chargerHistorique();
+    }
+
+    @FXML
     private void handleRecherche() {
         String motCle = rechercheField.getText();
         List<User> resultats = userService.rechercher(motCle);

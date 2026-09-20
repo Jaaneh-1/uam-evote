@@ -27,8 +27,7 @@
         <ComboBox fx:id="cibleTypeCombo" GridPane.rowIndex="2" GridPane.columnIndex="1" />
 
         <Label text="Valeur cible :" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-        <TextField fx:id="cibleValeurField" promptText="ex: L3 Informatique, Informatique, STA..."
-                   GridPane.rowIndex="3" GridPane.columnIndex="1" />
+        <ComboBox fx:id="cibleValeurCombo" GridPane.rowIndex="3" GridPane.columnIndex="1" />
 
         <Label text="Date début :" GridPane.rowIndex="4" GridPane.columnIndex="0" />
         <DatePicker fx:id="dateDebutPicker" GridPane.rowIndex="4" GridPane.columnIndex="1" />

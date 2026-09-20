@@ -39,9 +39,15 @@ public class UserFormController {
     @FXML
     private ComboBox<User.Role> roleCombo;
     @FXML
-    private TextField classeDeptField;
+    private ComboBox<String> ufrCombo;
     @FXML
-    private TextField ufrField;
+    private Label departementLabel;
+    @FXML
+    private ComboBox<String> departementCombo;
+    @FXML
+    private Label classeLabel;
+    @FXML
+    private ComboBox<String> classeCombo;
     @FXML
     private Label messageErreur;
 
@@ -54,6 +60,38 @@ public class UserFormController {
     @FXML
     public void initialize() {
         roleCombo.setItems(FXCollections.observableArrayList(User.Role.values()));
+        ufrCombo.setItems(FXCollections.observableArrayList(uam.evote.utils.ReferentielUAM.listerUFR()));
+
+        ufrCombo.valueProperty().addListener((obs, ancien, nouveau) -> rafraichirDepartements());
+        departementCombo.valueProperty().addListener((obs, ancien, nouveau) -> rafraichirClasses());
+        roleCombo.valueProperty().addListener((obs, ancien, nouveau) -> mettreAJourVisibiliteClasse());
+
+        mettreAJourVisibiliteClasse();
+    }
+
+    private void rafraichirDepartements() {
+        String ufr = ufrCombo.getValue();
+        departementCombo.setItems(FXCollections.observableArrayList(
+                ufr == null ? java.util.List.of() : uam.evote.utils.ReferentielUAM.listerDepartements(ufr)
+        ));
+    }
+
+    private void rafraichirClasses() {
+        String ufr = ufrCombo.getValue();
+        String departement = departementCombo.getValue();
+        classeCombo.setItems(FXCollections.observableArrayList(
+                (ufr == null || departement == null)
+                        ? java.util.List.of()
+                        : uam.evote.utils.ReferentielUAM.listerClasses(ufr, departement)
+        ));
+    }
+
+    private void mettreAJourVisibiliteClasse() {
+        boolean etudiant = roleCombo.getValue() == User.Role.ETUDIANT;
+        classeLabel.setVisible(etudiant);
+        classeLabel.setManaged(etudiant);
+        classeCombo.setVisible(etudiant);
+        classeCombo.setManaged(etudiant);
     }
 
     public void setOnSuccess(Runnable callback) {
@@ -70,10 +108,17 @@ public class UserFormController {
         emailField.setText(user.getEmail());
         loginField.setText(user.getLogin());
         roleCombo.setValue(user.getRole());
-        classeDeptField.setText(
-                user.getRole() == User.Role.ETUDIANT ? user.getClasse() : user.getDepartement()
-        );
-        ufrField.setText(user.getUfr());
+
+        ufrCombo.setValue(user.getUfr());
+        if (user.getRole() == User.Role.ETUDIANT) {
+            departementCombo.setValue(
+                    uam.evote.utils.ReferentielUAM.trouverDepartementDeClasse(user.getUfr(), user.getClasse())
+            );
+            classeCombo.setValue(user.getClasse());
+        } else if (user.getRole() == User.Role.ENSEIGNANT) {
+            departementCombo.setValue(user.getDepartement());
+        }
+
         cheminPhotoChoisie = user.getPhoto();
 
         passwordField.setPromptText("Laisser vide pour ne pas changer");
@@ -169,13 +214,13 @@ public class UserFormController {
         user.setEmail(emailField.getText().trim());
         user.setLogin(loginField.getText().trim());
         user.setRole(roleCombo.getValue());
-        user.setUfr(ufrField.getText().trim());
+        user.setUfr(ufrCombo.getValue());
         user.setPhoto(cheminPhotoChoisie);
 
         if (roleCombo.getValue() == User.Role.ETUDIANT) {
-            user.setClasse(classeDeptField.getText().trim());
+            user.setClasse(classeCombo.getValue());
         } else if (roleCombo.getValue() == User.Role.ENSEIGNANT) {
-            user.setDepartement(classeDeptField.getText().trim());
+            user.setDepartement(departementCombo.getValue());
         }
 
         return user;
@@ -183,8 +228,17 @@ public class UserFormController {
 
     private boolean validerChamps() {
         if (nomField.getText().isBlank() || prenomField.getText().isBlank()
-                || loginField.getText().isBlank() || roleCombo.getValue() == null) {
-            afficherErreur("Veuillez remplir au moins Nom, Prénom, Login et Rôle.");
+                || loginField.getText().isBlank() || roleCombo.getValue() == null
+                || ufrCombo.getValue() == null) {
+            afficherErreur("Veuillez remplir au moins Nom, Prénom, Login, Rôle et UFR.");
+            return false;
+        }
+        if (roleCombo.getValue() == User.Role.ETUDIANT && classeCombo.getValue() == null) {
+            afficherErreur("Veuillez sélectionner la classe de l'étudiant.");
+            return false;
+        }
+        if (roleCombo.getValue() == User.Role.ENSEIGNANT && departementCombo.getValue() == null) {
+            afficherErreur("Veuillez sélectionner le département de l'enseignant.");
             return false;
         }
         return true;
