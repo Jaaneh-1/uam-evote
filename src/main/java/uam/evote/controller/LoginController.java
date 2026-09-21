@@ -14,33 +14,47 @@ import uam.evote.service.AuthService;
 import java.io.IOException;
 import java.util.Optional;
 
+import uam.evote.utils.DatabaseConnection;
+import uam.evote.utils.ServerConfig;
+
 public class LoginController {
 
     @FXML
     private TextField loginField;
 
     @FXML
+    private TextField adresseServeurField;
+    @FXML
     private PasswordField passwordField;
-
     @FXML
     private Label messageErreur;
 
     private final AuthService authService = new AuthService();
 
     @FXML
+    public void initialize() {
+        adresseServeurField.setText(ServerConfig.lireAdresseServeur());
+    }
+
+
+    @FXML
     private void handleConnexion() {
+        String adresseServeur = adresseServeurField.getText().trim();
         String login = loginField.getText().trim();
         String motDePasse = passwordField.getText();
 
-        if (login.isEmpty() || motDePasse.isEmpty()) {
-            afficherErreur("Veuillez remplir tous les champs.");
+        if (adresseServeur.isEmpty() || login.isEmpty() || motDePasse.isEmpty()) {
+            afficherErreur("Veuillez remplir tous les champs, y compris l'adresse du serveur.");
             return;
         }
+
+        DatabaseConnection.setHost(adresseServeur);
 
         try {
             Optional<User> resultat = authService.connexion(login, motDePasse);
 
             if (resultat.isPresent()) {
+                ServerConfig.sauvegarderAdresseServeur(adresseServeur);
                 User user = resultat.get();
                 System.out.println("Connexion réussie : " + user);
                 rediriger(user);
@@ -49,7 +63,7 @@ public class LoginController {
             }
 
         } catch (RuntimeException e) {
-            afficherErreur("Connexion au serveur impossible. Vérifiez votre réseau et réessayez.");
+            afficherErreur("Connexion au serveur impossible. Vérifiez l'adresse du serveur et votre réseau.");
         }
     }
 
@@ -96,6 +110,13 @@ public class LoginController {
 
     @FXML
     private void handleScanQR() {
+        String adresseServeur = adresseServeurField.getText().trim();
+        if (adresseServeur.isEmpty()) {
+            afficherErreur("Veuillez renseigner l'adresse du serveur avant de scanner un QR code.");
+            return;
+        }
+        DatabaseConnection.setHost(adresseServeur);
+
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
                     getClass().getResource("/fxml/qr-scanner.fxml")
@@ -104,6 +125,7 @@ public class LoginController {
 
             QrScannerController controller = loader.getController();
             controller.setOnQrDetecte(user -> {
+                ServerConfig.sauvegarderAdresseServeur(adresseServeur);
                 System.out.println("Connexion par QR réussie : " + user);
                 rediriger(user);
             });

@@ -9,12 +9,18 @@ import java.util.Properties;
 
 public class DatabaseConnection {
 
-    private static String url;
+    private static String port;
+    private static String dbName;
     private static String user;
     private static String password;
 
-    // Bloc statique : exécuté une seule fois, au premier chargement de la classe.
-    // Il lit le fichier db.properties pour récupérer les identifiants de connexion.
+    private static String host = "";
+
+    // Bloc statique : lit une seule fois, au démarrage, les réglages qui ne changent
+    // jamais d'un poste à l'autre (port, nom de la base, identifiants MySQL).
+    // L'adresse du serveur, elle, N'EST PLUS ici : elle est saisie par l'utilisateur
+    // sur l'écran de connexion (voir setHost), pour permettre le même installeur
+    // sur plusieurs postes du réseau sans jamais recompiler.
     static {
         try (InputStream input = DatabaseConnection.class
                 .getClassLoader()
@@ -30,7 +36,8 @@ public class DatabaseConnection {
             Properties props = new Properties();
             props.load(input);
 
-            url = props.getProperty("db.url");
+            port = props.getProperty("db.port", "3306");
+            dbName = props.getProperty("db.name", "uam_evote");
             user = props.getProperty("db.user");
             password = props.getProperty("db.password");
 
@@ -39,22 +46,28 @@ public class DatabaseConnection {
         }
     }
 
-    // Empêche d'instancier cette classe (elle ne sert qu'à fournir des connexions)
     private DatabaseConnection() {
     }
 
     /**
-     * Ouvre et retourne une nouvelle connexion à la base de données.
-     * À utiliser dans un try-with-resources pour qu'elle se ferme automatiquement.
+     * Définit l'adresse (IP ou nom d'hôte) du serveur MySQL à utiliser pour toutes
+     * les connexions suivantes de cette session.
      */
+    public static void setHost(String nouvelHote) {
+        host = nouvelHote;
+    }
+
+    public static String getHost() {
+        return host;
+    }
+
     public static Connection getConnection() throws SQLException {
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + dbName;
         return DriverManager.getConnection(url, user, password);
     }
 
-    /**
-     * Petit test manuel : vérifie que la connexion à la base fonctionne.
-     */
     public static void main(String[] args) {
+        setHost("localhost");
         try (Connection conn = getConnection()) {
             System.out.println("Connexion réussie à la base : " + conn.getCatalog());
         } catch (SQLException e) {
