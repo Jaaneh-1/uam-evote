@@ -143,7 +143,7 @@ public class CandidatFormController {
         }
 
         try {
-            Path dossierPhotos = Paths.get("data", "photos");
+            Path dossierPhotos = uam.evote.utils.AppDataDir.get("photos");
             Files.createDirectories(dossierPhotos);
 
             String extension = fichierChoisi.getName().substring(fichierChoisi.getName().lastIndexOf('.'));

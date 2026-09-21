@@ -21,8 +21,7 @@ import java.util.List;
  */
 public class OfflineVoteQueue {
 
-    private static final Path FICHIER = Paths.get("data", "votes_en_attente.csv");
-
+    private static final Path FICHIER = AppDataDir.get("votes_en_attente.csv");
     public void ajouter(int electionId, int candidatId, int utilisateurId) {
         try {
             Files.createDirectories(FICHIER.getParent());

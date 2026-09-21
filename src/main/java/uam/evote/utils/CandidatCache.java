@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class CandidatCache {
 
-    private static final Path FICHIER = Paths.get("data", "candidats_cache.csv");
+    private static final Path FICHIER = AppDataDir.get("candidats_cache.csv");
 
     public void sauvegarder(int electionId, List<Candidat> candidats) {
         try {

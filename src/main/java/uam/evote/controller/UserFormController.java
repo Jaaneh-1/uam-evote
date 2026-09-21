@@ -139,7 +139,7 @@ public class UserFormController {
         }
 
         try {
-            Path dossierPhotos = Paths.get("data", "profils");
+            Path dossierPhotos = uam.evote.utils.AppDataDir.get("profils");
             Files.createDirectories(dossierPhotos);
 
             String extension = fichierChoisi.getName().substring(fichierChoisi.getName().lastIndexOf('.'));
